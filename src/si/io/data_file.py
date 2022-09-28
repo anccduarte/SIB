@@ -16,7 +16,10 @@ def read_data_file(file: str, sep: str, features: bool, label: bool):
 	if label:
 		X = ndarr[:,:-1]
 		y = ndarr[:,-1]
-		nfeat, nlab = ncols if features else (None, None)
+		if features:
+			*nfeat, nlab = ncols 
+		else:
+			nfeat, nlab = None, None
 	else:
 		X = ndarr
 		nfeat = ncols if features else None

@@ -22,7 +22,7 @@ class Dataset:
 		self.X = X
 		self.y = y
 		self.features = [f"feat{i+1}" for i in range(X.shape[1])] if features is None else features
-		self.label = "label" if label is None else label
+		self.label = "label" if (y is not None and label is None) else label
 
 	def shape(self):
 		"""

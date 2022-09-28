@@ -92,7 +92,9 @@ class Dataset:
 		Remove linhas do dataset que contenham valores omissos (NaN).
 		"""
 		idx = np.isnan(self.X).any(axis=1)
-		self.X, self.y = self.X[~idx], self.y[~idx]
+		self.X = self.X[~idx]
+		if self.y is not None:
+			self.y = self.y[~idx]
 
 	def fill_nan(self, fill):
 		"""
@@ -100,6 +102,7 @@ class Dataset:
 		"""
 		vals = {"mean": np.nanmean, "median": np.nanmedian}
 		self.X = np.nan_to_num(self.X, nan=vals[fill](self.X,axis=0))
+
 
 if __name__ == "__main__":
 

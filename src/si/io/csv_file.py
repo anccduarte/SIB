@@ -5,12 +5,11 @@ import sys
 sys.path.append("../data")
 from dataset import Dataset
 
-# não utiliza o argumento 'features'
-def read_csv_file(file: str, sep: str, label: bool):
+def read_csv_file(file: str, sep: str, features: bool, label: bool):
 	"""
 	Lê um ficheiro csv e retorna um objeto Dataset.
 	"""
-	df = pd.read_csv(file, sep=sep)
+	df = pd.read_csv(file, sep=sep, header="infer" if features else None)
 	col_names = list(df.columns)
 	if label:
 		X = np.array(df.iloc[:,:-1])
@@ -22,7 +21,6 @@ def read_csv_file(file: str, sep: str, label: bool):
 		y, name_lab = None, None
 	return Dataset(X, y, name_feats, name_lab)
 
-# não utiliza o argumento 'features'
 def write_csv_file(nfile: str, dataset: Dataset, sep: str, label: bool):
 	"""
 	Gera um ficheiro csv a partir de um objeto Dataset.
@@ -38,7 +36,7 @@ def write_csv_file(nfile: str, dataset: Dataset, sep: str, label: bool):
 if __name__ == "__main__":
 	# read_csv
 	path1 = "../../../datasets/iris/iris.csv"
-	ds = read_csv_file(file=path1, sep=",", label=True)
+	ds = read_csv_file(file=path1, sep=",", features=True, label=True)
 	print(ds.X.shape, ds.y.shape)
 	# write_csv
 	path2 = "~/Downloads/bin/new_iris.csv"

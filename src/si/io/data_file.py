@@ -5,6 +5,9 @@ sys.path.append("../data")
 from dataset import Dataset
 
 def read_data_file(file: str, sep: str, features: bool, label: bool):
+	"""
+	Lê um ficheiro de texto (p.e., txt, data) e retorna um objeto Dataset.
+	"""
 	# caso o ficheiro contenha o nome das features, skip_header=1
 	ndarr = np.genfromtxt(file, delimiter=sep, skip_header=features)
 	# extraír nomes das features caso estejam presentes
@@ -27,6 +30,9 @@ def read_data_file(file: str, sep: str, features: bool, label: bool):
 	return Dataset(X, y, nfeat, nlab)
 
 def write_data_file(nfile: str, dataset: Dataset, sep: str, label: bool):
+	"""
+	Gera um ficheiro txt a partir de um objeto Dataset.
+	"""
 	header = " ".join(dataset.features)
 	ds = dataset.X
 	if label:

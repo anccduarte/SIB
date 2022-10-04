@@ -1,82 +1,92 @@
 
+from typing import Tuple
 import numpy as np
 import pandas as pd
 
 class Dataset:
 
-	def __init__(self, X, y=None, features=None, label=None):
+	"""
+	Constructs a tabular dataset for machine learning.
+	"""
+	
+	def __init__(self, X: np.ndarray, y: np.ndarray = None, features: list = None, label: str = None):
 		"""
-		Inicializa uma instância da classe Dataset.
+		Constructs a tabular dataset for machine learning.
+
+		Parameters
+		----------
+		X: np.ndarray
+			The matrix containing the dataset's features
+		y: np.ndarray
+			The label vector
+		features: list
+			The names of the features
+		label: str
+			The name of the label
 		"""
-		if type(X) is not np.ndarray:
-			raise TypeError("O parâmetro 'X' deve ser do tipo 'np.ndarray'.")
-		if type(y) is not np.ndarray and y is not None:
-			raise TypeError("O parâmetro 'y' deve ser do tipo 'np.ndarray' ou 'None'.")
-		if type(features) not in (list, tuple) and features is not None:
-			raise TypeError("O parâmetro 'features' deve ser do tipo 'list', 'tuple' ou 'None'.")
-		if type(label) is not str and label is not  None:
-			raise TypeError("O parâmetro 'label' deve ser do tipo 'str' ou 'None'.")
 		if y is not None:
 			if X.shape[0] != y.size:
-				raise ValueError("O número de exemplos de 'X' deve ser igual à dimensão de 'y'.")
+				raise ValueError("The number of examples in 'X' must be equal to the size of 'y'.")
 		self.X = X
 		self.y = y
 		self.features = [f"feat{i+1}" for i in range(X.shape[1])] if features is None else features
 		self.label = "label" if (y is not None and label is None) else label
 
-	def shape(self):
+	def shape(self) -> Tuple[int, int]:
 		"""
-		Retorna um tuplo contendo as dimensões do dataset.
+		Returns a two-element tuple consisting of the dataset's dimensions.
 		"""
 		return self.X.shape
 
-	def has_label(self):
+	def has_label(self) -> bool:
 		"""
-		Retorna um valor booleano indicativo da presença de labels.
+		Returns a boolean value representative of the presence of a label.
 		"""
 		return True if self.y is not None else False
 
-	def get_classes(self):
+	def get_classes(self) -> np.ndarray:
 		"""
-		Retorna um np.ndarray contendo as classes do dataset.
+		Returns an np.ndarray containing the unique classes of the dataset.
 		"""
+		if self.y is None:
+			raise ValueError("The parameter 'y' was set to 'None'.")
 		return np.unique(self.y)
 		#return list(set(self.y))
 
-	def get_mean(self):
+	def get_mean(self) -> np.ndarray:
 		"""
-		Retorna um np.ndarray contendo a média de cada coluna do dataset.
+		Returns an np.ndarray containing the mean of each feature.
 		"""
 		return self.X.mean(axis=0)
 
-	def get_variance(self):
+	def get_variance(self) -> np.ndarray:
 		"""
-		Retorna um np.ndarray contendo a variância de cada coluna do dataset.
+		Returns an np.ndarray containing the variance of each feature.
 		"""
 		return self.X.var(axis=0)
 
-	def get_median(self):
+	def get_median(self) -> np.ndarray:
 		"""
-		Retorna um np.ndarray contendo a mediana de cada coluna do dataset.
+		Returns an np.ndarray containing the median of each feature.
 		"""
 		return np.median(self.X, axis=0)
 
-	def get_min(self):
+	def get_min(self) -> np.ndarray:
 		"""
-		Retorna um np.ndarray contendo o valor mínimo de cada coluna do dataset.
+		Returns an np.ndarray containing the minimum value of each feature.
 		"""
 		return self.X.min(axis=0)
 
-	def get_max(self):
+	def get_max(self) -> np.ndarray:
 		"""
-		Retorna um np.ndarray contendo o valor máximo de cada coluna do dataset.
+		Returns an np.ndarray containing the maximum value of each feature.
 		"""
 		return self.X.max(axis=0)
 
-	def summary(self):
+	def summary(self) -> pd.DataFrame:
 		"""
-		Retorna um pd.Dataframe contendo métricas descritivas (média, variância, mediana, mínimo
-		e máximo) de cada coluna do dataset.
+		Returns a pd.DataFrame containing some descriptive metrics (mean, variance, median,
+		minimum value and maximum value) of each feature.
 		"""
 		df = pd.DataFrame({
 			"Mean": self.get_mean(),
@@ -89,16 +99,24 @@ class Dataset:
 
 	def remove_nan(self):
 		"""
-		Remove linhas do dataset que contenham valores omissos (NaN).
+		Removes examples which contain missing values (NaN).
 		"""
 		idx = np.isnan(self.X).any(axis=1)
 		self.X = self.X[~idx]
 		if self.y is not None:
 			self.y = self.y[~idx]
 
-	def fill_nan(self, fill):
+	def fill_nan(self, fill: str):
 		"""
-		Subtitui todos os valores omissos (NaN) do dataset pela média/mediana da respetiva coluna.
+		Replaces all dataset's missing values (NaN) by the mean/median of the respective column.
+		Allowed values for 'fill' are:
+			- 'mean': calls np.nanmean on the matrix containing the features
+			- 'median': calls np.nanmedian on the matrix containig the features
+
+		Parameters
+		----------
+		fill: str
+			The string description of the value by which missing values are replaced
 		"""
 		vals = {"mean": np.nanmean, "median": np.nanmedian}
 		self.X = np.nan_to_num(self.X, nan=vals[fill](self.X,axis=0))

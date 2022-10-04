@@ -4,9 +4,20 @@ import sys
 sys.path.append("../data")
 from dataset import Dataset
 
-def read_data_file(file: str, sep: str, features: bool, label: bool):
+def read_data_file(file: str, sep: str, features: bool, label: bool) -> Dataset:
 	"""
-	Lê um ficheiro de texto (p.e., txt, data) e retorna um objeto Dataset.
+	Reads a text file (e.g., txt, data) and returns a Dataset object.
+
+	Parameters
+	----------
+	file: str
+		Path to file to be read
+	sep: str
+		The separator used in the file
+	features: bool
+		Representative of the presence of a header in the file
+	label: bool
+		Representative of the presence of a label in the file
 	"""
 	# caso o ficheiro contenha o nome das features, skip_header=1
 	ndarr = np.genfromtxt(file, delimiter=sep, skip_header=features)
@@ -31,7 +42,18 @@ def read_data_file(file: str, sep: str, features: bool, label: bool):
 
 def write_data_file(nfile: str, dataset: Dataset, sep: str, label: bool):
 	"""
-	Gera um ficheiro txt a partir de um objeto Dataset.
+	Writes to a txt file from a Dataset object.
+	
+	Parameters
+	----------
+	nfile: str
+		Path to file to be written
+	dataset: Dataset
+		A Dataset object
+	sep: str
+		The separator to be used in the file
+	label: bool
+		Representative of the presence of a label in the Dataset object
 	"""
 	header = " ".join(dataset.features)
 	ds = dataset.X

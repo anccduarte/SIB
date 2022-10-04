@@ -5,9 +5,20 @@ import sys
 sys.path.append("../data")
 from dataset import Dataset
 
-def read_csv_file(file: str, sep: str, features: bool, label: bool):
+def read_csv_file(file: str, sep: str, features: bool, label: bool) -> Dataset:
 	"""
-	Lê um ficheiro csv e retorna um objeto Dataset.
+	Reads a csv file and returns a Dataset object.
+	
+	Parameters
+	----------
+	file: str
+		Path to file to be read
+	sep: str
+		The separator used in the file
+	features: bool
+		Representative of the presence of a header in the file
+	label: bool
+		Representative of the presence of a label in the file
 	"""
 	df = pd.read_csv(file, sep=sep, header="infer" if features else None)
 	col_names = list(df.columns)
@@ -23,7 +34,18 @@ def read_csv_file(file: str, sep: str, features: bool, label: bool):
 
 def write_csv_file(nfile: str, dataset: Dataset, sep: str, label: bool):
 	"""
-	Gera um ficheiro csv a partir de um objeto Dataset.
+	Writes to a csv file from a Dataset object.
+
+	Parameters
+	----------
+	nfile: str
+		Path to file to be written
+	dataset: Dataset
+		A Dataset object
+	sep: str
+		The separator to be used in the file
+	label: bool
+		Representative of the presence of a label in the Dataset object
 	"""
 	df = pd.DataFrame(dataset.X)
 	df.columns = dataset.features

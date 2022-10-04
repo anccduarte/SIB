@@ -8,7 +8,7 @@ class Dataset:
 	"""
 	Constructs a tabular dataset for machine learning.
 	"""
-	
+
 	def __init__(self, X: np.ndarray, y: np.ndarray = None, features: list = None, label: str = None):
 		"""
 		Constructs a tabular dataset for machine learning.
@@ -97,6 +97,26 @@ class Dataset:
 			})
 		return df
 
+	@classmethod
+	def from_random(cls, n_examples: int, n_features: int, label: bool) -> 'Dataset':
+		"""
+		Randomly generates and returns a new Dataset object based on given parameters.
+		The values of the dataset's features range from 1 to 9. If present, the values of
+		the dataset's label range from 0 to 2.
+
+		Parameters
+		----------
+		n_examples: int
+			Number of examples in the dataset
+		n_features: int
+			Number of features in the dataset
+		lable: bool
+			Whether the dataset has a label
+		"""
+		X = np.random.randint(1, 10, (n_examples, n_features))
+		y = np.random.randint(0, 3, (n_examples,)) if label else None
+		return cls(X, y)
+
 	def remove_nan(self):
 		"""
 		Removes examples which contain missing values (NaN).
@@ -152,4 +172,11 @@ if __name__ == "__main__":
 	ds3.fill_nan("mean")
 	print(f"shape (after filling NaNs): {ds3.shape()}")
 	print(ds3.summary())
+
+	print("\nEX4")
+	ds4 = Dataset.from_random(n_examples=10, n_features=4, label=True)
+	print(f"shape: {ds4.shape()}")
+	print(f"has_label: {ds4.has_label()}")
+	print(f"classes: {ds4.get_classes()}")
+	print(ds4.summary())
 

@@ -9,15 +9,15 @@ from typing import Tuple
 def f_classification(dataset: Dataset) -> Tuple[np.ndarray, np.ndarray]:
 	"""
 	Scoring function for classification problems. It computes one-way ANOVA F-scores for the
-    provided dataset. The F-scores allow to analyze if the mean between two or more groups
-    (factors) are significantly different. Samples are grouped by the labels of the dataset.
-    Returns a tuple (F, p) of np.ndarrays, such that F contains the F-scores of the features 
-    and p consists of the p-values of the F-scores.
+	provided dataset. The F-scores allow to analyze if the mean between two or more groups
+	(factors) are significantly different. Samples are grouped by the labels of the dataset.
+	Returns a tuple (F, p) of np.ndarrays, such that F contains the F-scores of the features 
+	and p consists of the p-values of the F-scores.
 
-    Parameters
-    ----------
-    dataset: Dataset
-    	A labeled Dataset object
+	Parameters
+	----------
+	dataset: Dataset
+		A labeled Dataset object
 	"""
 	classes = dataset.get_classes()
 	groups = [dataset.X[dataset.y == c] for c in classes]

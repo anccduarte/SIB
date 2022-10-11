@@ -98,7 +98,7 @@ class Dataset:
 		return df
 
 	@classmethod
-	def from_random(cls, n_examples: int, n_features: int, label: bool) -> 'Dataset':
+	def from_random(cls, n_examples: int, n_features: int, label: bool, seed: int = None) -> 'Dataset':
 		"""
 		Randomly generates and returns a new Dataset object based on given parameters.
 		The values of the dataset's features range from 1 to 9. If present, the values of
@@ -110,9 +110,12 @@ class Dataset:
 			Number of examples in the dataset
 		n_features: int
 			Number of features in the dataset
-		lable: bool
+		label: bool
 			Whether the dataset has a label
+		seed: int
+			Seed for the random number generator
 		"""
+		np.random.seed(seed)
 		X = np.random.randint(1, 10, (n_examples, n_features))
 		y = np.random.randint(0, 3, (n_examples,)) if label else None
 		return cls(X, y)
@@ -174,7 +177,7 @@ if __name__ == "__main__":
 	print(ds3.summary())
 
 	print("\nEX4")
-	ds4 = Dataset.from_random(n_examples=10, n_features=4, label=True)
+	ds4 = Dataset.from_random(n_examples=10, n_features=4, label=True, seed=0)
 	print(f"shape: {ds4.shape()}")
 	print(f"has_label: {ds4.has_label()}")
 	print(f"classes: {ds4.get_classes()}")

@@ -24,17 +24,22 @@ class VarianceThreshold:
 
 		Attributes
 		----------
+		fitted: bool
+			Whether the selector is already fitted
 		variance: np.ndarray
 			Array containing the variance of each feature of the dataset
 		"""
+		# parameters
 		if threshold < 1:
 			raise ValueError("The value of 'threshold' must be greater than 0.")
 		self.threshold = threshold
+		# attributes
+		self.fitted = False
 		self.variance = None
 
-	def fit(self, dataset: Dataset) -> 'VarianceThreshold':
+	def fit(self, dataset: Dataset) -> "VarianceThreshold":
 		"""
-		Fits VarianceThreshold to compute the variances of the dataset's features.
+		Fits VarianceThreshold by computing the variances of the dataset's features.
 		Returns self.
 
 		Parameters
@@ -43,6 +48,7 @@ class VarianceThreshold:
 			A Dataset object
 		"""
 		self.variance = dataset.get_variance()
+		self.fitted = True
 		return self
 
 	def transform(self, dataset: Dataset) -> Dataset:
@@ -53,17 +59,20 @@ class VarianceThreshold:
 		Parameters
 		----------
 		dataset: Dataset
-			A labeled Dataset object
+			A Dataset object
 		"""
-		mask = self.variance > self.threshold
-		new_X = dataset.X[:,mask]
-		features = np.array(dataset.features)[mask]
-		return Dataset(new_X, dataset.y, list(features), dataset.label)
+		if not self.fitted:
+			raise Warning("Fit 'VarianceThreshold' before calling 'transform'.")
+		else:
+			mask = self.variance > self.threshold
+			new_X = dataset.X[:,mask]
+			new_feats = np.array(dataset.features)[mask]
+			return Dataset(new_X, dataset.y, list(new_feats), dataset.label)
 
 	def fit_transform(self, dataset: Dataset) -> Dataset:
 		"""
 		Fits VarianceThreshold and transforms the dataset by selecting the features according to
-		the variance threshold. Returns a new Dataset object containing the selected features.
+		the variance threshold. Returns a new Dataset object only containing the selected features.
 
 		Parameters
 		----------

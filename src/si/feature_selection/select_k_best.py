@@ -4,7 +4,7 @@ import sys
 sys.path.append("../data")
 sys.path.append("../statistics")
 from dataset import Dataset
-from f_classification import f_classification # f_regression (?)
+from f_classification import f_classification
 from typing import Callable
 
 class SelectKBest:
@@ -13,12 +13,13 @@ class SelectKBest:
 	Selects features according to the k highest scores.
 	Feature ranking is performed by computing the scores of each feature using a scoring function:
 		- f_classification: ANOVA F-value of each feature with examples grouped by label
-		- f_regression (?)
 	"""
 
 	def __init__(self, score_func: Callable, k: int):
 		"""
 		Selects features according to the k highest scores.
+		Feature ranking is performed by computing the scores of each feature using a scoring function:
+			- f_classification: ANOVA F-value of each feature with examples grouped by label
 
 		Parameters
 		----------
@@ -29,21 +30,26 @@ class SelectKBest:
 
 		Attributes
 		----------
+		fitted: bool
+			Whether the selector is already fitted
 		F: np.ndarray
 			The F-score(s) of feature(s)
 		p: np.ndarray
 			The p-value(s) of F-score(s)
 		"""
+		# parameters
 		if k < 1:
 			raise ValueError("The value of 'k' must be greater than 0.")
 		self.score_func = score_func
 		self.k = k
+		# attributes
+		self.fitted = False
 		self.F = None
 		self.p = None
 
-	def fit(self, dataset: Dataset) -> 'SelectKBest':
+	def fit(self, dataset: Dataset) -> "SelectKBest":
 		"""
-		Fits SelectKBest to compute the F-scores and p-values of the dataset's features.
+		Fits SelectKBest by computing the F-scores and p-values of the dataset's features.
 		Returns self.
 
 		Parameters
@@ -52,6 +58,7 @@ class SelectKBest:
 			A labeled Dataset object
 		"""
 		self.F, self.p = self.score_func(dataset)
+		self.fitted = True
 		return self
 
 	def transform(self, dataset: Dataset) -> Dataset:
@@ -64,10 +71,13 @@ class SelectKBest:
 		dataset: Dataset
 			A labeled Dataset object
 		"""
-		idxs = np.argsort(self.F)[-self.k:]
-		new_X = dataset.X[:,idxs]
-		new_feats = np.array(dataset.features)[idxs]
-		return Dataset(new_X, dataset.y, list(new_feats), dataset.label)
+		if not self.fitted:
+			raise Warning("Fit 'SelectKBest' before calling 'transform'.")
+		else:
+			idxs = np.argsort(self.F)[-self.k:]
+			new_X = dataset.X[:,idxs]
+			new_feats = np.array(dataset.features)[idxs]
+			return Dataset(new_X, dataset.y, list(new_feats), dataset.label)
 
 	def fit_transform(self, dataset: Dataset) -> Dataset:
 		"""

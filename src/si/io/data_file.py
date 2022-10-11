@@ -69,6 +69,6 @@ if __name__ == "__main__":
 	ds = read_data_file(file=path1, sep=",", features=False, label=True)
 	print(ds.shape())
 	# write_data_file
-	path2 = "../../../../../bin/new_breast.txt"
+	path2 = "../../../../../SIB/bin/new_breast.txt"
 	write_data_file(nfile=path2, dataset=ds, sep=" ", label=True)
 

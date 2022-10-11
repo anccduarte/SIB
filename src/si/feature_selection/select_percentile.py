@@ -4,7 +4,7 @@ import sys
 sys.path.append("../data")
 sys.path.append("../statistics")
 from dataset import Dataset
-from f_classification import f_classification # f_regression (?)
+from f_classification import f_classification
 from typing import Callable
 
 class SelectPercentile:
@@ -13,12 +13,13 @@ class SelectPercentile:
 	Selects the best features according to a given percentile.
 	Feature ranking is performed by computing the scores of each feature using a scoring function:
 		- f_classification: ANOVA F-value of each feature with examples grouped by label
-		- f_regression (?)
 	"""
 
 	def __init__(self, score_func: Callable, percentile: float):
 		"""
 		Selects the best features according to a given percentile.
+		Feature ranking is performed by computing the scores of each feature using a scoring function:
+			- f_classification: ANOVA F-value of each feature with examples grouped by label
 
 		Parameters
 		----------
@@ -29,19 +30,24 @@ class SelectPercentile:
 
 		Attributes
 		----------
+		fitted: bool
+			Whether the selector is already fitted
 		F: np.ndarray
 			The F-score(s) of feature(s)
 		p: np.ndarray
 			The p-value(s) of F-score(s)
 		"""
+		# parameters
 		if percentile < 0 or percentile > 1:
 			raise ValueError("The value of 'percentile' must be in (0,1).")
 		self.score_func = score_func
 		self.percentile = percentile
+		# attributes
+		self.fitted = False
 		self.F = None
 		self.p = None
 
-	def fit(self, dataset: Dataset) -> 'SelectPercentile':
+	def fit(self, dataset: Dataset) -> "SelectPercentile":
 		"""
 		Fits SelectPercentile by computing the F-scores and p-values of the dataset's features.
 		Returns self.
@@ -52,6 +58,7 @@ class SelectPercentile:
 			A labeled Dataset object
 		"""
 		self.F, self.p = self.score_func(dataset)
+		self.fitted = True
 		return self
 
 	def transform(self, dataset: Dataset) -> Dataset:
@@ -64,11 +71,14 @@ class SelectPercentile:
 		dataset: Dataset
 			A labeled Dataset object
 		"""
-		n_feats = round(len(dataset.features)*self.percentile)
-		idxs = np.argsort(self.F)[-n_feats:]
-		new_X = dataset.X[:,idxs]
-		new_fits = np.array(dataset.features)[idxs]
-		return Dataset(new_X, dataset.y, list(new_fits), dataset.label)
+		if not self.fitted:
+			raise Warning("Fit 'SelectPercentile' before calling 'transform'.")
+		else:
+			n_feats = round(len(dataset.features)*self.percentile)
+			idxs = np.argsort(self.F)[-n_feats:]
+			new_X = dataset.X[:,idxs]
+			new_feats = np.array(dataset.features)[idxs]
+			return Dataset(new_X, dataset.y, list(new_feats), dataset.label)
 
 	def fit_transform(self, dataset: Dataset) -> Dataset:
 		"""

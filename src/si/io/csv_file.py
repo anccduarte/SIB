@@ -61,6 +61,6 @@ if __name__ == "__main__":
 	ds = read_csv_file(file=path1, sep=",", features=True, label=True)
 	print(ds.X.shape, ds.y.shape)
 	# write_csv
-	path2 = "~/Downloads/bin/new_iris.csv"
+	path2 = "~/Downloads/SIB/bin/new_iris.csv"
 	write_csv_file(nfile=path2, dataset=ds, sep=",", label=True)
 

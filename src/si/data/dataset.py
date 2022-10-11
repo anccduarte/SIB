@@ -115,9 +115,8 @@ class Dataset:
 		seed: int
 			Seed for the random number generator
 		"""
-		np.random.seed(seed)
-		X = np.random.randint(1, 10, (n_examples, n_features))
-		y = np.random.randint(0, 3, (n_examples,)) if label else None
+		X = np.random.RandomState(seed=seed).randint(1, 10, (n_examples, n_features))
+		y = np.random.RandomState(seed=seed).randint(0, 3, (n_examples,)) if label else None
 		return cls(X, y)
 
 	def remove_nan(self):

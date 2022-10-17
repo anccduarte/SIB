@@ -18,7 +18,7 @@ class KMeans:
 		- manhattan_distance: SUM[abs(pi - qi)]
 	"""
 
-	def __init__(self, k: int, max_iter: int, distance: Callable, seed: bool = None):
+	def __init__(self, k: int, max_iter: int, distance: Callable, seed: int = None):
 		"""
 		Implements the K-Means clustering algorithm.
 		Distances can be computed using two distinct formulas:
@@ -93,9 +93,9 @@ class KMeans:
 		"""
 		Fits KMeans by grouping all samples of a given dataset object in k clusters. To do so,
 		repeatidly finds the coordinates of k centroids, assigning each sample of the dataset
-		to the centroid it is closest to (Euclidean distance). It stops running when a maximum 
-		number of iterations is hit or when convergence is declared (no changes in sample assignment 
-		between two iterations of the algorithm). Returns self.
+		to the centroid it is closest to (Euclidean/Manhattan distance). It stops running when 
+		a maximum number of iterations is hit or when convergence is declared (no changes in 
+		sample assignment between two iterations of the algorithm). Returns self.
 
 		Parameters
 		----------
@@ -130,7 +130,7 @@ class KMeans:
 
 	def _get_distances_to_centroids(self, sample: np.ndarray) -> np.ndarray:
 		"""
-		Computes and returns the Euclidean distances between a given sample and all centroids.
+		Computes and returns the distances between a given sample and all centroids.
 
 		Parameters
 		----------

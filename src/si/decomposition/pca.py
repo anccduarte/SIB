@@ -58,7 +58,7 @@ class PCA:
 		# center data (X - mean)
 		self.mean = np.mean(dataset.X, axis=0)
 		X_centered = dataset.X - self.mean
-		# calculate SVD
+		# calculate SVD -> X_centered = U@np.diag(S)@V_t
 		U, S, V_t = np.linalg.svd(X_centered, full_matrices=False)
 		# determine the first <n_components> components
 		self.components = V_t[:self.n_components]
@@ -111,11 +111,11 @@ if __name__ == "__main__":
 	#print(pca.explained_variance)
 	x_reduced = pca.transform(ds)
 	print(x_reduced)
-
+	
 	print("\nEX2 - iris")
 	path = "../../../datasets/iris/iris.csv"
 	iris = read_csv_file(file=path, sep=",", features=True, label=True)
 	pca_iris = PCA(n_components=2)
 	iris_reduced = pca_iris.fit_transform(iris)
 	print(iris_reduced)
-
+	

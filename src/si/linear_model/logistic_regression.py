@@ -44,8 +44,8 @@ class LogisticRegression:
 	        Model parameter, namely the intercept of the linear model.
 	        For example, theta_zero * 1
 	    cost_history: dict
-            A dictionary containing the values of the cost function (J function) at each iteration
-            of the algorithm (gradient descent)
+    		A dictionary containing the values of the cost function (J function) at each iteration
+    		of the algorithm (gradient descent)
         """
         # parameters
         if l2_penalty <= 0:
@@ -71,15 +71,15 @@ class LogisticRegression:
     	"""
     	Performs one iteration of the gradient descent algorithm. The algorithm goes as follows:
     	1. Predicts the outputs of the dataset
-    		-> X @ theta + theta_zero (it then uses the sigomid function)
+            -> X @ theta + theta_zero (it then uses the sigomid function)
     	2. Computes the gradient vector and adjusts it according to the value of alpha
-    		-> (alpha / m) * (y_pred - y_true) @ X
+            -> (alpha / m) * (y_pred - y_true) @ X
     	3. Computes the penalization term
-    		-> alpha * (l2 / m)
+            -> alpha * (l2 / m)
     	4. Updates theta
-    		-> theta = theta - gradient - penalization
+            -> theta = theta - gradient - penalization
     	5. Updates theta_zero
-    		-> theta_zero = theta_zero - (alpha / m) * SUM[y_pred - y_true] * X(0), X(0) = [1,1,...,1]
+            -> theta_zero = theta_zero - (alpha / m) * SUM[y_pred - y_true] * X(0), X(0) = [1,1,...,1]
 
     	Parameters
     	----------
@@ -88,14 +88,14 @@ class LogisticRegression:
 		m: int
 			The number of rows of the Dataset object
     	"""
-		# predicted y (uses the sigmoid function)
+    	# predicted y (uses the sigmoid function)
     	y_pred = sigmoid_function(np.dot(dataset.X, self.theta) + self.theta_zero)
-		# computing the gradient vector given a learning rate alpha
-		# vector of shape (n_features,) -> gradient[k] updates self.theta[k]
+    	# computing the gradient vector given a learning rate alpha
+    	# vector of shape (n_features,) -> gradient[k] updates self.theta[k]
     	gradient = (self.alpha / m) * np.dot(y_pred - dataset.y, dataset.X)
-		# computing the penalization term
+    	# computing the penalization term
     	penalization_term = self.theta * self.alpha * (self.l2_penalty / m)
-		# updating the model parameters (theta and theta_zero)
+    	# updating the model parameters (theta and theta_zero)
     	self.theta = self.theta - gradient - penalization_term
     	self.theta_zero = self.theta_zero - (self.alpha * (1 / m)) * np.sum(y_pred - dataset.y)
 
@@ -119,7 +119,7 @@ class LogisticRegression:
         i = 0
         converged = False
         while i < self.max_iter and not converged:
-        	# compute gradient descent iteration (update model parameters)
+    		# compute gradient descent iteration (update model parameters)
             self._gradient_descent_iter(dataset, m)
             # add new entry to self.cost_history
             self.cost_history[i] = self.cost(dataset)
@@ -146,7 +146,7 @@ class LogisticRegression:
         self.theta_zero = 0
         # main loop -> gradient descent
         for i in range(self.max_iter):
-            # compute gradient descent iteration (update model parameters)
+    		# compute gradient descent iteration (update model parameters)
             self._gradient_descent_iter(dataset, m)
             # add new entry to self.cost_history
             self.cost_history[i] = self.cost(dataset)

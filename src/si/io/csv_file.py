@@ -32,9 +32,9 @@ def read_csv_file(file: str, sep: str, features: bool, label: bool) -> Dataset:
 		y, name_lab = None, None
 	return Dataset(X, y, name_feats, name_lab)
 
-def write_csv_file(nfile: str, dataset: Dataset, sep: str, label: bool):
+def write_csv_file(nfile: str, dataset: Dataset, sep: str, label: bool) -> None:
 	"""
-	Writes to a csv file from a Dataset object.
+	Writes to a csv file from a Dataset object. Returns None.
 
 	Parameters
 	----------

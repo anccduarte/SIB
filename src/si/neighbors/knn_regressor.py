@@ -1,22 +1,16 @@
 
 import numpy as np
 import sys
-sys.path.append("../data")
-sys.path.append("../io")
-sys.path.append("../model_selection")
-sys.path.append("../metrics")
-sys.path.append("../statistics")
-from csv_file import read_csv_file
+PATHS = ["../data", "../metrics"]
+sys.path.extend(PATHS)
 from dataset import Dataset
-from distances import euclidean_distance
 from rmse import rmse
-from split import train_test_split
 from typing import Callable
 
 class KNNRegressor:
 
 	"""
-	Implements the K-Nearest Neighbors classifier.
+	Implements the K-Nearest Neighbors regressor.
 	Distances between test examples and some label can be computed using:
 		- euclidean_distance: sqrt(SUM[(pi - qi)^2])
 		- manhattan_distance: SUM[abs(pi - qi)]
@@ -24,7 +18,7 @@ class KNNRegressor:
 
 	def __init__(self, k: int, distance: Callable):
 		"""
-		Implements the K-Nearest Neighbors classifier.
+		Implements the K-Nearest Neighbors regressor.
 		Distances between test examples and some label can be computed using:
 			- euclidean_distance: sqrt(SUM[(pi - qi)^2])
 			- manhattan_distance: SUM[abs(pi - qi)]
@@ -113,6 +107,12 @@ class KNNRegressor:
 
 
 if __name__ == "__main__":
+
+	TEST_PATHS = ["../io", "../model_selection", "../statistics"]
+	sys.path.extend(TEST_PATHS)
+	from csv_file import read_csv_file
+	from distances import euclidean_distance
+	from split import train_test_split
 
 	print("EX - cpu")
 	path_to_file = "../../../datasets/cpu/cpu.csv"

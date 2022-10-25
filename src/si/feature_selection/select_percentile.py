@@ -2,9 +2,7 @@
 import numpy as np
 import sys
 sys.path.append("../data")
-sys.path.append("../statistics")
 from dataset import Dataset
-from f_classification import f_classification
 from typing import Callable
 
 class SelectPercentile:
@@ -95,6 +93,10 @@ class SelectPercentile:
 
 
 if __name__ == "__main__":
+
+	sys.path.append("../statistics")
+	from f_classification import f_classification
+
 	X = np.array([[1,2,3,4],[3,6,5,1],[7,4,1,5],[1,3,2,9]])
 	y = np.array([1,1,0,0])
 	ds = Dataset(X,y)

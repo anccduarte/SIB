@@ -1,8 +1,8 @@
 
 import numpy as np
 import sys
-sys.path.append("../data")
-sys.path.append("../statistics")
+PATHS = ["../data", "../statistics"]
+sys.path.extend(PATHS)
 from dataset import Dataset
 from f_classification import f_classification
 from typing import Callable

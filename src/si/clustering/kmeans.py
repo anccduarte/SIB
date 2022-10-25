@@ -2,11 +2,7 @@
 import numpy as np
 import sys
 sys.path.append("../data")
-sys.path.append("../io")
-sys.path.append("../statistics")
-from csv_file import read_csv_file
 from dataset import Dataset
-from distances import euclidean_distance, manhattan_distance
 from typing import Callable
 
 class KMeans:
@@ -48,9 +44,9 @@ class KMeans:
 		# parameters
 		if k < 2:
 			raise ValueError("The value of 'k' must be greater than 1.")
-		self.k = k
 		if max_iter < 1:
 			raise ValueError("The value of 'max_iter' must be greater than 0.")
+		self.k = k
 		self.max_iter = max_iter
 		self.distance = distance
 		self.seed = seed
@@ -200,6 +196,11 @@ class KMeans:
 
 
 if __name__ == "__main__":
+
+	TEST_PATHS = ["../io", "../statistics"]
+	sys.path.extend(TEST_PATHS)
+	from csv_file import read_csv_file
+	from distances import euclidean_distance, manhattan_distance
 
 	print("EX1")
 	ds1 = Dataset.from_random(n_examples=10, n_features=10, label=False, seed=0)

@@ -1,7 +1,5 @@
 
 import numpy as np
-import sys
-sys.path.append("../data")
 
 def rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
 	"""

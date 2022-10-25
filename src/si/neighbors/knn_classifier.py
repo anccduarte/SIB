@@ -1,16 +1,10 @@
 
 import numpy as np
 import sys
-sys.path.append("../data")
-sys.path.append("../io")
-sys.path.append("../model_selection")
-sys.path.append("../metrics")
-sys.path.append("../statistics")
+PATHS = ["../data", "../metrics"]
+sys.path.extend(PATHS)
 from accuracy import accuracy
-from csv_file import read_csv_file
 from dataset import Dataset
-from distances import euclidean_distance, manhattan_distance
-from split import train_test_split
 from typing import Callable, Union
 
 class KNNClassifier:
@@ -114,6 +108,12 @@ class KNNClassifier:
 
 
 if __name__ == "__main__":
+
+	TEST_PATHS = ["../io", "../model_selection", "../statistics"]
+	sys.path.extend(TEST_PATHS)
+	from csv_file import read_csv_file
+	from distances import euclidean_distance, manhattan_distance
+	from split import train_test_split
 
 	print("EX1")
 	ds = Dataset.from_random(n_examples=10, n_features=10, label=True, seed=0)

@@ -2,9 +2,7 @@
 import numpy as np
 import sys
 sys.path.append("../data")
-sys.path.append("../io")
 from dataset import Dataset
-from csv_file import read_csv_file
 
 class PCA:
 
@@ -101,6 +99,9 @@ class PCA:
 
 
 if __name__ == "__main__":
+
+	sys.path.append("../io")
+	from csv_file import read_csv_file
 
 	print("EX1")
 	ds = Dataset.from_random(n_examples=10, n_features=10, label=False, seed=0)

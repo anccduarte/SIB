@@ -1,8 +1,5 @@
 
 import numpy as np
-import sys
-sys.path.append("../data")
-from dataset import Dataset
 
 def euclidean_distance(x: np.ndarray, y: np.ndarray) -> np.ndarray:
 	"""
@@ -41,6 +38,11 @@ def manhattan_distance(x: np.ndarray, y: np.ndarray) -> np.ndarray:
 
 
 if __name__ == "__main__":
+
+	import sys
+	sys.path.append("../data")
+	from dataset import Dataset
+
 	ds = Dataset.from_random(n_examples=10, n_features=10, label=False, seed=0)
 	x = ds.X[0,:]
 	y = ds.X[1:,]

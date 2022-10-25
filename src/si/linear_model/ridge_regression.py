@@ -85,7 +85,7 @@ class RidgeRegression:
         dataset: Dataset
             A Dataset object (the dataset to fit the model to)
         m: int
-            The number of rows of the Dataset object
+            The number of examples in the dataset
         """
         # predicted y
         y_pred = np.dot(dataset.X, self.theta) + self.theta_zero
@@ -151,7 +151,7 @@ class RidgeRegression:
             self.cost_history[i] = self.cost(dataset)
             # update learning rate
             is_lower = abs(self.cost_history[i] - self.cost_history.get(i-1, np.inf)) < self.tolerance
-            if is_lower: self.alpha //= 2
+            if is_lower: self.alpha /= 2
         return self
 
     def fit(self, dataset: Dataset) -> "RidgeRegression":

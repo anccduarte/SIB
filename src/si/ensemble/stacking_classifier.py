@@ -99,12 +99,10 @@ class StackingClassifier:
 
 if __name__ == "__main__":
 
-	TEST_PATHS = ["../io", "../linear_model", "../model_selection", "../neighbors", "../statistics"]
+	TEST_PATHS = ["../io", "../model_selection", "../statistics"]
 	sys.path.extend(TEST_PATHS)
 	from csv_file import read_csv_file
 	from distances import euclidean_distance
-	from knn_classifier import KNNClassifier
-	from logistic_regression import LogisticRegression
 	from sklearn.preprocessing import StandardScaler
 	from split import train_test_split
 

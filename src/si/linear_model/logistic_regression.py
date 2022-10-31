@@ -75,7 +75,7 @@ class LogisticRegression:
 		2. Computes the gradient vector and adjusts it according to the value of alpha
 			-> (alpha / m) * (y_pred - y_true) @ X
 		3. Computes the penalization term
-			-> alpha * (l2 / m)
+			-> theta * alpha * (l2 / m)
 		4. Updates theta
 			-> theta = theta - gradient - penalization
 		5. Updates theta_zero
@@ -97,7 +97,7 @@ class LogisticRegression:
 		penalization_term = self.theta * self.alpha * (self.l2_penalty / m)
 		# updating the model parameters (theta and theta_zero)
 		self.theta = self.theta - gradient - penalization_term
-		self.theta_zero = self.theta_zero - (self.alpha * (1 / m)) * np.sum(y_pred - dataset.y)
+		self.theta_zero = self.theta_zero - (self.alpha / m) * np.sum(y_pred - dataset.y)
 
 	def _regular_fit(self, dataset: Dataset) -> "LogisticRegression":
 		"""
@@ -230,7 +230,7 @@ if __name__ == "__main__":
 	from split import train_test_split
 
 	path_to_file = "../../../datasets/breast/breast-bin.csv"
-	breast = read_csv_file(file=path_to_file, sep=",", features=True, label=True)
+	breast = read_csv_file(file=path_to_file, sep=",", features=False, label=True)
 	breast.X = StandardScaler().fit_transform(breast.X)
 	breast_trn, breast_tst = train_test_split(breast, test_size=0.3, random_state=2)
 	breast_logistic = LogisticRegression(l2_penalty=1, alpha=0.001, max_iter=2000, tolerance=0.0001, adaptative_alpha=False)

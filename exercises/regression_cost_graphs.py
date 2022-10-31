@@ -41,7 +41,7 @@ plt.show()
 
 # Logistic Regression (breast)
 breast_file = "../datasets/breast/breast-bin.csv"
-breast = read_csv_file(file=breast_file, sep=",", features=True, label=True)
+breast = read_csv_file(file=breast_file, sep=",", features=False, label=True)
 breast.X = StandardScaler().fit_transform(breast.X)
 breast_trn, breast_tst = train_test_split(breast, test_size=0.3, random_state=2)
 

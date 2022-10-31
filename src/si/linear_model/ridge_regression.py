@@ -74,7 +74,7 @@ class RidgeRegression:
         2. Computes the gradient vector and adjusts it according to the value of alpha
             -> (alpha / m) * (y_pred - y_true) @ X
         3. Computes the penalization term
-            -> alpha * (l2 / m)
+            -> theta * alpha * (l2 / m)
         4. Updates theta
             -> theta = theta - gradient - penalization
         5. Updates theta_zero
@@ -96,7 +96,7 @@ class RidgeRegression:
         penalization_term = self.theta * self.alpha * (self.l2_penalty / m)
         # updating the model parameters (theta and theta_zero)
         self.theta = self.theta - gradient - penalization_term
-        self.theta_zero = self.theta_zero - (self.alpha * (1 / m)) * np.sum(y_pred - dataset.y)
+        self.theta_zero = self.theta_zero - (self.alpha / m) * np.sum(y_pred - dataset.y)
 
     def _regular_fit(self, dataset: Dataset) -> "RidgeRegression":
         """

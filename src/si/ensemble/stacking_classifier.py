@@ -57,9 +57,9 @@ class StackingClassifier:
 		# get the predictions of each model for trainig data
 		predictions = np.array([model.predict(dataset) for model in self.models])
 		# create a Dataset object
-		ds = Dataset(predictions.T, dataset.y)
+		ds_train = Dataset(predictions.T, dataset.y)
 		# fit the final model based on the predictions of the ensemble
-		self.final_model.fit(ds)
+		self.final_model.fit(ds_train)
 		self.fitted = True
 		return self
 
@@ -78,9 +78,9 @@ class StackingClassifier:
 		# get the predictions of each model for testing data
 		predictions = np.array([model.predict(dataset) for model in self.models])
 		# create a Dataset object
-		ds = Dataset(predictions.T, dataset.y)
+		ds_test = Dataset(predictions.T, dataset.y)
 		# return the predictions
-		return self.final_model.predict(ds)
+		return self.final_model.predict(ds_test)
 
 	def score(self, dataset: Dataset) -> float:
 		"""

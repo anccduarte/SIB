@@ -17,7 +17,7 @@ class KNNRegressor:
         - manhattan_distance: SUM[abs(pi - qi)]
     """
 
-    def __init__(self, k: int = 4, distance: Callable = euclidean_distance):
+    def __init__(self, k: int = 4, weighted: bool = False, distance: Callable = euclidean_distance):
         """
         Implements the K-Nearest Neighbors regressor.
         Distances between test examples and some label can be computed using:
@@ -28,6 +28,8 @@ class KNNRegressor:
         ----------
         k: int (default=4)
             Number of neighbors to be used
+        weighted: bool
+            Whether to weight closest neighbors when predicting labels
         distance: callable (default=euclidean_distance)
             Function used to compute the distances
 
@@ -37,15 +39,21 @@ class KNNRegressor:
             Whether the model is already fitted
         dataset: Dataset
             A Dataset object (training data)
+        weight_vector: np.ndarray
+            The weights to give to each closest neighbor when predicting labels (only applicable
+            when 'weights' is True)
         """
         # parameters
         if k < 1:
             raise ValueError("The value of 'k' must be greater than 0.")
         self.k = k
+        self.weighted = weighted
         self.distance = distance
         # attributes
         self.fitted = False
         self.dataset = None
+        if self.weighted:
+            self.weights_vector = np.arange(self.k,0,-1)
 
     def fit(self, dataset: Dataset) -> "KNNRegressor":
         """
@@ -75,6 +83,9 @@ class KNNRegressor:
         label_indices = np.argsort(distances)[:self.k]
         # get the values at the previous indices
         label_vals = self.dataset.y[label_indices]
+        # tranform labels vector to account for weights (if applicable)
+        if self.weighted:
+            label_vals = np.repeat(label_vals, self.weights_vector)
         # compute the mean value and return it
         return np.mean(label_vals)
 
@@ -117,8 +128,8 @@ if __name__ == "__main__":
     print("EX - cpu")
     path_to_file = "../../../datasets/cpu/cpu.csv"
     cpu = read_csv_file(file=path_to_file, sep=",", features=True, label=True)
-    cpu_trn, cpu_tst = train_test_split(dataset=cpu, test_size=0.3, random_state=12)
-    knn = KNNRegressor(k=4, distance=euclidean_distance)
+    cpu_trn, cpu_tst = train_test_split(dataset=cpu, test_size=0.3, random_state=1)
+    knn = KNNRegressor(k=4, weighted=True, distance=euclidean_distance)
     knn.fit(cpu_trn)
     rmse = knn.score(cpu_tst)
     print(f"RMSE: {rmse:.4f}")

@@ -17,7 +17,7 @@ class KNNClassifier:
         - manhattan_distance: SUM[abs(pi - qi)]
     """
 
-    def __init__(self, k: int = 4, distance: Callable = euclidean_distance):
+    def __init__(self, k: int = 4, weighted: bool = False, distance: Callable = euclidean_distance):
         """
         Implements the K-Nearest Neighbors classifier.
         Distances between test examples and some label can be computed using:
@@ -28,6 +28,8 @@ class KNNClassifier:
         ----------
         k: int (default=4)
             Number of neighbors to be used
+        weighted: bool
+            Whether to weight closest neighbors when predicti labels
         distance: callable (default=euclidean_distance)
             Function used to compute the distances
 
@@ -37,14 +39,20 @@ class KNNClassifier:
             Whether the model is already fitted
         dataset: Dataset
             A Dataset object (training data)
+        weight_vector: np.ndarray
+            The weights to give to each closest neighbor when predicting labels (only applicable
+            when 'weights' is True)
         """
         # parameters
         if k < 1:
             raise ValueError("The value of 'k' must be greater than 0.")
         self.k = k
+        self.weighted = weighted
         self.distance = distance
         # attributes
         self.fitted = False
+        if self.weighted:
+            self.weights_vector = np.arange(self.k,0,-1)
         self.dataset = None
 
     def fit(self, dataset: Dataset) -> "KNNClassifier":
@@ -74,9 +82,12 @@ class KNNClassifier:
         # determine the indexes of the <k> nearest examples
         k_nearest_neighbors = np.argsort(distances)[:self.k]
         # get the classes corresponding to the previous indexes
-        k_nearest_neighbors_labels = self.dataset.y[k_nearest_neighbors]
+        knn_labels = self.dataset.y[k_nearest_neighbors]
+        # tranform labels vector to account for weights (if applicable)
+        if self.weighted:
+            knn_labels = np.repeat(knn_labels, self.weights_vector)
         # get the most frequent class in the selected <k> examples
-        labels, counts = np.unique(k_nearest_neighbors_labels, return_counts=True)
+        labels, counts = np.unique(knn_labels, return_counts=True)
         return labels[np.argmax(counts)]
 
     def predict(self, dataset: Dataset) -> np.ndarray:
@@ -120,7 +131,7 @@ if __name__ == "__main__":
     ds = Dataset.from_random(n_examples=10, n_features=10, label=True, seed=0)
     print(ds.get_classes())
     trn, tst = train_test_split(dataset=ds, test_size=0.3, random_state=42)
-    knn = KNNClassifier(k=3, distance=manhattan_distance)
+    knn = KNNClassifier(k=3, weighted=False, distance=manhattan_distance)
     knn.fit(trn)
     y_pred = knn.predict(tst)
     #print(y_pred)
@@ -132,7 +143,7 @@ if __name__ == "__main__":
     iris = read_csv_file(file=path_to_file, sep=",", features=True, label=True)
     print(iris.get_classes())
     iris_trn, iris_tst = train_test_split(dataset=iris, test_size=0.3, random_state=42)
-    iris_knn = KNNClassifier(k=4, distance=euclidean_distance)
+    iris_knn = KNNClassifier(k=4, weighted=True, distance=euclidean_distance)
     iris_knn.fit(iris_trn)
     y_iris_pred = iris_knn.predict(iris_tst)
     #print(y_iris_pred)

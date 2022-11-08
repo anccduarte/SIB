@@ -14,22 +14,27 @@ class RidgeRegression:
     This model solves the linear regression problem using an adapted Gradient Descent technique.
     """
 
-    def __init__(self, l2_penalty: float, alpha: float, max_iter: int, tolerance: Union[int, float], adaptative_alpha: bool):
+    def __init__(self,
+                 l2_penalty: Union[int, float] = 1,
+                 alpha: Union[int, float] = 0.001,
+                 max_iter: int = 1000,
+                 tolerance: Union[int, float] = 1,
+                 adaptative_alpha: bool = False):
         """
         RidgeRegression is a linear model using the L2 regularization.
         This model solves the linear regression problem using an adapted Gradient Descent technique.
 
         Parameters
         ----------
-        l2_penalty: float
+        l2_penalty: int, float (default=1)
             The L2 regularization parameter
-        alpha: float
+        alpha: int, float (default=0.001)
             The learning rate
-        max_iter: int
+        max_iter: int (default=1000)
             The maximum number of iterations
-        tolerance: int | float
+        tolerance: int, float (default=1)
             Tolerance for stopping gradient descent
-        adaptative_alpha: bool
+        adaptative_alpha: bool (default=False)
             Whether an adaptative alpha is used in the gradient descent
 
         Attributes
@@ -225,5 +230,7 @@ if __name__ == "__main__":
     cpu_ridge = RidgeRegression(l2_penalty=1, alpha=0.001, max_iter=2000, tolerance=1, adaptative_alpha=True)
     cpu_ridge = cpu_ridge.fit(cpu_trn)
     predictions = cpu_ridge.predict(cpu_tst)
-    print(predictions)
+    score = cpu_ridge.score(cpu_tst)
+    print(f"Predictions:\n{predictions}")
+    print(f"\nScore: {score:.2f}")
 

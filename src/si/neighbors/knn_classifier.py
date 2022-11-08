@@ -37,11 +37,11 @@ class KNNClassifier:
         ----------
         fitted: bool
             Whether the model is already fitted
-        dataset: Dataset
-            A Dataset object (training data)
         weight_vector: np.ndarray
             The weights to give to each closest neighbor when predicting labels (only applicable
             when 'weights' is True)
+        dataset: Dataset
+            A Dataset object (training data)
         """
         # parameters
         if k < 1:

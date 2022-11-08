@@ -33,6 +33,7 @@ def train_test_split(dataset: Dataset, test_size: float = 0.3, random_state: int
 
 
 if __name__ == "__main__":
+    
     ds = Dataset.from_random(n_examples=10, n_features=10, label=True, seed=2)
     trn, tst = train_test_split(dataset=ds, test_size=0.3, random_state=0)
     print(trn.X.shape, trn.y.shape, tst.X.shape, tst.y.shape)

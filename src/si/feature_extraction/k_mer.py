@@ -32,6 +32,8 @@ class KMer:
             A list containing all possible combinations of k-mers (length <k>)
         """
         # parameters
+        if k < 1:
+            raise ValueError("The value of 'k' must be a positive integer.")
         self.k = k
         self.alphabet = list(alphabet)
         # attributes
@@ -69,7 +71,7 @@ class KMer:
         # get k-mers of size <self.k>
         seq = sequence[0]
         seq_kmers = [seq[i:i+self.k] for i in range(len(seq)-self.k+1)]
-        # get frequencies of each k-mear
+        # get frequencies of each k-mer
         k_mers_dict = {k_mer: 0 for k_mer in self.k_mers}
         for k in seq_kmers:
             k_mers_dict[k] += 1
@@ -88,7 +90,7 @@ class KMer:
         """
         if not self.fitted:
             raise Warning("Fit KMer before calling 'transform'.")
-        # compute kmers in each sequence of the dataset
+        # compute normalized frequencies for each sequence in the dataset
         frequencies = np.apply_along_axis(self._get_frequencies, axis=1, arr=dataset.X)
         return Dataset(frequencies, dataset.y, self.k_mers, dataset.label)
 

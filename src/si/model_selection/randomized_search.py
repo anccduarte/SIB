@@ -1,5 +1,4 @@
 
-import itertools
 import numpy as np
 import sys
 sys.path.append("../data")
@@ -13,7 +12,6 @@ def randomized_search_cv(model,
                          cv: int = 5,
                          n_iter: int = 10,
                          test_size: float = 0.3,
-                         random_state: int = None,
                          scoring: Callable = None) -> list[dict]:
     """
     Implements a randomized search algorithm with cross-validation for hyperparameter optimization. Contrary
@@ -40,8 +38,6 @@ def randomized_search_cv(model,
         The number of random hyperparameter combinations
     test_size: float
         The proportion of the dataset to be used for testing
-    random_state: int
-        Seed for the permutation generator used when choosing hyperparameter combinations
     scoring: callable
         Scoring function used to evaluate the performance of the model (if None, uses the model's scoring function)
     """
@@ -52,16 +48,13 @@ def randomized_search_cv(model,
             raise AttributeError(e_msg)
     # initialize scores -> to return
     scores = []
-    # get all possible combinations of hyperparameters and randomly select <n_iter> of them
-    combinations = np.array(list(itertools.product(*parameter_distribution.values())))
-    idx_to_use = np.random.RandomState(seed=random_state).permutation(combinations.shape[0])[:n_iter]
-    combs_to_use = combinations[idx_to_use]
-    # for each combination of hyperparameters
-    for comb in combs_to_use:
+    # cross-validate the model <n_iter> times
+    for _ in range(n_iter):
         # initialize parameters -> add to scores
         parameters = {}
-        # set parameter configuration (according to comb) to cross-validate the model
-        for param, value in zip(parameter_distribution.keys(), comb):
+        # set parameter configuration to cross-validate the model, and add it to parameters
+        for param in parameter_distribution:
+            value = np.random.choice(parameter_distribution[param])
             setattr(model, param, value)
             parameters[param] = value
         # cross-validate the model
@@ -101,7 +94,6 @@ if __name__ == "__main__":
                               parameter_distribution=params,
                               cv=3,
                               n_iter=10,
-                              test_size=0.3,
-                              random_state=None)
+                              test_size=0.3)
     print_scores(gs)
 

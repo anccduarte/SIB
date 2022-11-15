@@ -35,14 +35,14 @@ class KMer:
         if k < 1:
             raise ValueError("The value of 'k' must be a positive integer.")
         self.k = k
-        self.alphabet = list(alphabet)
+        self.alphabet = list(alphabet.upper())
         # attributes
         self.fitted = False
         self.k_mers = None
 
     def fit(self, dataset: Dataset) -> "KMer":
         """
-        Fits 'KMer' by computing all possible combinations of bases (nucleotides or aminoacids) of
+        Fits 'KMer' by computing all possible combinations of bases (nucleotides or amino acids) of
         length <self.k>. Returns self.
 
         Parameters
@@ -69,7 +69,7 @@ class KMer:
             The input sequence
         """
         # get k-mers of size <self.k>
-        seq = sequence[0]
+        seq = sequence[0].upper()
         seq_kmers = [seq[i:i+self.k] for i in range(len(seq)-self.k+1)]
         # get frequencies of each k-mer
         k_mers_dict = {k_mer: 0 for k_mer in self.k_mers}
@@ -78,7 +78,7 @@ class KMer:
         # compute and return normalized frequencies
         return np.array([k_mers_dict[kmer] / len(seq) for kmer in self.k_mers])
 
-    def transform(self, dataset: Dataset) -> np.ndarray:
+    def transform(self, dataset: Dataset) -> Dataset:
         """
         Transforms 'KMer' by calculating the normalized frequencies of the k-mers of all sequences
         in the dataset. Returns a new dataset object containing the computed data.
@@ -94,10 +94,10 @@ class KMer:
         frequencies = np.apply_along_axis(self._get_frequencies, axis=1, arr=dataset.X)
         return Dataset(frequencies, dataset.y, self.k_mers, dataset.label)
 
-    def fit_transform(self, dataset: Dataset) -> np.ndarray:
+    def fit_transform(self, dataset: Dataset) -> Dataset:
         """
         Fits and transforms 'KMeans' by computing all possible combinations of bases (nucleotides
-        or aminoacids) of length <self.k>, and calculating the normalized frequencies of the k-mers
+        or amino acids) of length <self.k>, and calculating the normalized frequencies of the k-mers
         of all sequences in the dataset. Returns a new dataset object containing the computed data.
 
         Parameters
@@ -139,5 +139,20 @@ if __name__ == "__main__":
     print("\n################################################################################\n")
 
     # TRANSPORTERS (aminoacid k-mers)
-    # file missing
+    # read csv to Dataset
+    path2 = "../../../datasets/transporters/transporters.csv"
+    transporters = read_csv_file(path2, sep=",", features=True, label=True)
+    # compute new Dataset with k-mer frequencies as features
+    km2 = KMer(k=2, alphabet="ACDEFGHIKLMNPQRSTVWY")
+    transporters_km = km2.fit_transform(transporters)
+    # scale and split
+    transporters_km.X = StandardScaler().fit_transform(transporters_km.X)
+    transporters_train, transporters_test = train_test_split(transporters_km, 0.3, 2)
+    # predict labels using LogisticRegression
+    lr2 = LogisticRegression()
+    lr2.fit(transporters_train)
+    preds2 = lr2.predict(transporters_test)
+    print(f"Predictions:\n{preds2}")
+    score2 = lr2.score(transporters_test)
+    print(f"Accuracy score: {score2*100:.2f}%")
 

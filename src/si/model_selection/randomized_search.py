@@ -14,10 +14,10 @@ def randomized_search_cv(model,
                          test_size: float = 0.3,
                          scoring: Callable = None) -> list[dict]:
     """
-    Implements a randomized search algorithm with cross-validation for hyperparameter optimization. Contrary
-    to grid-search, it uses a fixed number of hyperparameter combinations randomly sampled from an hyperparameter
-    distribution. Returns a list of dictionaries, each representing one combination of hyperparameters. Each
-    dictionary contains 4 keys:
+    Implements a randomized search algorithm with cross-validation for hyperparameter optimization.
+    Contrary to grid-search, it uses a fixed number of hyperparameter combinations randomly sampled
+    from an hyperparameter distribution. Returns a list of dictionaries, each representing one
+    combination of hyperparameters. Each dictionary contains 4 keys:
     1. seeds: The seeds used in the train-test split
     2. train: The scores attained with training data
     3. test: The scores obtained with testing data
@@ -30,8 +30,8 @@ def randomized_search_cv(model,
     dataset: Dataset
         A Dataset object
     parameter_distribution: dict
-        Dictionary with the names of the parameters to be tested as keys, and lists of parameter settings to try
-        as values
+        Dictionary with the names of the parameters to be tested as keys, and lists of parameter
+        settings to try as values
     cv: int
         The number of folds used in cross-validation
     n_iter: int
@@ -39,7 +39,8 @@ def randomized_search_cv(model,
     test_size: float
         The proportion of the dataset to be used for testing
     scoring: callable
-        Scoring function used to evaluate the performance of the model (if None, uses the model's scoring function)
+        Scoring function used to evaluate the performance of the model (if None, uses the model's
+        scoring function)
     """
     # check if the model has all the parameters in parameter_distribution
     for param in parameter_distribution:

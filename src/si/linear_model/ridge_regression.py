@@ -51,7 +51,7 @@ class RidgeRegression:
             A dictionary containing the values of the cost function (J function) at each iteration
             of the algorithm (gradient descent)
         """
-        # parameters
+        # check values
         if l2_penalty <= 0:
             raise ValueError("The value of 'l2_penalty' must be positive.")
         if alpha <= 0:
@@ -60,6 +60,7 @@ class RidgeRegression:
             raise ValueError("The value of 'max_iter' must be a positive integer.")
         if tolerance <= 0:
             raise ValueError("The value of 'tolerance' must be positive.")
+        # parameters
         self.l2_penalty = l2_penalty # lambda
         self.alpha = alpha
         self.max_iter = max_iter

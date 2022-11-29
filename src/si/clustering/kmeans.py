@@ -17,8 +17,9 @@ class KMeans:
     """
 
     def __init__(self,
-                 k: int = 6,
-                 max_iter: int = 400, 
+                 k: int = 5,
+                 max_iter: int = 1000,
+                 tolerance: int = 0,
                  distance: Callable = euclidean_distance, 
                  seed: int = None):
         """
@@ -29,13 +30,16 @@ class KMeans:
 
         Parameters
         ----------
-        k: int
+        k: int (default=5)
             Number of clusters/centroids
-        max_iter: int
+        max_iter: int (deafult=1000)
             Maximum number of iterations for a single run
-        distance: callable
+        tolerance: int (default=0)
+            The required maximum number of changes in label assignment between iterations
+            to declare convergence
+        distance: callable (default=euclidean_distance)
             Function that computes distances
-        seed: int
+        seed: int (default=None)
             Seed for the permutation generator used in centroid initialization
 
         Attributes
@@ -54,6 +58,7 @@ class KMeans:
             raise ValueError("The value of 'max_iter' must be greater than 0.")
         self.k = k
         self.max_iter = max_iter
+        self.tolerance = tolerance
         self.distance = distance
         self.seed = seed
         # attributes
@@ -114,7 +119,7 @@ class KMeans:
             # get closest centroid to each sample of the dataset (along each sample -> axis=1)
             new_labels = np.apply_along_axis(self._get_closest_centroid, axis=1, arr=dataset.X)
             # if labels == new_labels break out of while loop (label assignment converged)
-            if (labels == new_labels).all():
+            if np.sum(labels != new_labels) <= self.tolerance:
                 converged = True
             else:
                 # re-compute the new centroids:
@@ -127,7 +132,7 @@ class KMeans:
                 i += 1
         # update attributes
         self.fitted = True
-        self.labels = new_labels # only assign in 'predict' ???
+        # self.labels = new_labels -> only assign in 'predict'?
         return self
 
     def _get_distances_to_centroids(self, sample: np.ndarray) -> np.ndarray:
@@ -209,7 +214,7 @@ if __name__ == "__main__":
 
     print("EX1")
     ds1 = Dataset.from_random(n_examples=10, n_features=10, label=False, seed=0)
-    km1 = KMeans(k=2)
+    km1 = KMeans(k=2, max_iter=400)
     # print(km1.fit_transform(ds1))
     print(km1.fit_predict(ds1))
     
@@ -219,9 +224,10 @@ if __name__ == "__main__":
     # print(km2.fit_transform(ds2))
     print(km2.fit_predict(ds2))
 
-    print("\nEX3 - iris")
+    tol = 2
+    print(f"\nEX3 - iris (tolerance={tol})")
     path = "../../../datasets/iris/iris.csv"
     iris = read_csv_file(path, sep=",", features=True, label=True)
-    km3 = KMeans(k=3, max_iter=1000, distance=euclidean_distance, seed=0)
+    km3 = KMeans(k=3, tolerance=tol, seed=0)
     print(km3.fit_predict(iris))
     

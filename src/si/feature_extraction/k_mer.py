@@ -12,16 +12,16 @@ class KMer:
     k-mers of all sequences in a given dataset.
     """
 
-    def __init__(self, k: int, alphabet: str):
+    def __init__(self, k: int = 3, alphabet: str = "ATCG"):
         """
         Initializes an instance of KMer. KMer implements a feature extraction algorithm which computes
         the normalized frequencies of the k-mers of all sequences in a given dataset.
 
         Parameters
         ----------
-        k: int
+        k: int (default=3)
             The length of the k-mers
-        alphabet: str
+        alphabet: str (default="ATCG")
             The alphabet to be used when generating an array of all combinations of length <k>
 
         Attributes
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     path = "../../../datasets/tfbs/tfbs.csv"
     tfbs = read_csv_file(path, sep=",", features=True, label=True)
     # build new Dataset containig the k-mers
-    km = KMer(k=3, alphabet="ATCG")
+    km = KMer()
     tfbs_km = km.fit_transform(tfbs)
     # scale and split
     tfbs_km.X = StandardScaler().fit_transform(tfbs_km.X)

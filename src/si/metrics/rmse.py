@@ -4,7 +4,7 @@ import numpy as np
 def rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     It computes and returns the Root-Mean-Square Error (RMSE) of the model on a
-    given dataset. RMSE: sqrt((SUM[(ti - pi)^2]) / N)
+    given dataset. RMSE: sqrt((SUM[(ti - pi)^2]) / N).
 
     Parameters
     ----------

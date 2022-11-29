@@ -32,13 +32,13 @@ def randomized_search_cv(model,
     parameter_distribution: dict
         Dictionary with the names of the parameters to be tested as keys, and lists of parameter
         settings to try as values
-    cv: int
+    cv: int (default=5)
         The number of folds used in cross-validation
-    n_iter: int
+    n_iter: int (default=10)
         The number of random hyperparameter combinations
-    test_size: float
+    test_size: float (default=0.3)
         The proportion of the dataset to be used for testing
-    scoring: callable
+    scoring: callable (default=None)
         Scoring function used to evaluate the performance of the model (if None, uses the model's
         scoring function)
     """

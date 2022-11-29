@@ -28,7 +28,7 @@ class KNNClassifier:
         ----------
         k: int (default=4)
             Number of neighbors to be used
-        weighted: bool
+        weighted: bool (default=False)
             Whether to weight closest neighbors when predicti labels
         distance: callable (default=euclidean_distance)
             Function used to compute the distances
@@ -37,7 +37,7 @@ class KNNClassifier:
         ----------
         fitted: bool
             Whether the model is already fitted
-        weight_vector: np.ndarray
+        weights_vector: np.ndarray
             The weights to give to each closest neighbor when predicting labels (only applicable
             when 'weights' is True)
         dataset: Dataset

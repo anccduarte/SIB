@@ -1,6 +1,5 @@
 
 import numpy as np
-import sys
 from activation import sigmoid
 from typing import Callable
 
@@ -16,8 +15,9 @@ class Dense:
                  output_size: int,
                  weights_init: str = "random",
                  bias_init: str = "zeros",
-                 random_state: int = None,
-                 activation_function : Callable = sigmoid):
+                 activation_function : Callable = sigmoid,
+                 dropout: float = 0.0,
+                 random_state: int = None):
         """
         Initializes an instance of Dense. It implements a densely-connected neural network layer.
         Initially, weights and bias are set as chosen by the user (choices are restricted to
@@ -33,10 +33,12 @@ class Dense:
             The initializer for the weights matrix
         bias_init: str (default="zeros")
             The initializer for the bias vector
-        random_state: int (default=None)
-            Controls the random initialization of the weights matrix and/or bias vector
         activation_function: callable (default=sigmoid)
             The activation function to be used
+        dropout: float (default=0.0)
+            The percentage of neurons turned off in the layer at each step of trainig
+        random_state: int (default=None)
+            Controls the random initialization of the weights matrix and/or bias vector
 
         Attributes
         ----------
@@ -44,27 +46,41 @@ class Dense:
             The weights matrix used in training
         bias: np.ndarray
             The bias vector used in training
+        num_drop: int
+            The number of neurons turned off in the layer at each step of training
         """
-        # check values (sizes)
-        if input_size < 1:
-            raise ValueError("The value of 'input_size' must be a positive integer.")
-        if output_size < 1:
-            raise ValueError("The value of 'output_size' must be a positive integer.")
-        # check values (initializers)
-        if weights_init not in ["random", "zeros", "ones"]:
-            raise ValueError("The value of 'weights_init' must be in {'random', 'zeros', 'ones'}")
-        if bias_init not in ["random", "zeros", "ones"]:
-            raise ValueError("The value of 'bias_init' must be in {'random', 'zeros', 'ones'}")
+        # check values of parameters
+        self._check_init(input_size, output_size, weights_init, bias_init, dropout)
         # parameters
         self.input_size = input_size
         self.output_size = output_size
-        self.random_state = random_state
         self.activation_function = activation_function
+        self.random_state = random_state
         # attributes
         # if, initially, weights are set randomly and bias is initialized as a vector of zeros:
         # self.weights = np.random.randn(input_size, output_size) * 0.01
         # self.bias = np.zeros((1,output_size))
         self.weights, self.bias = self._init_weigths_and_bias(weights_init, bias_init)
+        self.num_drop = int(dropout * self.output_size)
+
+    @staticmethod
+    def _check_init(input_size, output_size, weights_init, bias_init, dropout):
+        """
+        Checks values of parameters of type numeric and 'str' when initializing an instance.
+        """
+        # check values (numeric)
+        if input_size < 1:
+            raise ValueError("The value of 'input_size' must be a positive integer.")
+        if output_size < 1:
+            raise ValueError("The value of 'output_size' must be a positive integer.")
+        if dropout < 0 or dropout >= 1:
+            raise ValueError("The value of 'dropout' must be in [0,1).")
+        # check values (initializers)
+        poss = ["random", "zeros", "ones"]
+        if weights_init not in poss:
+            raise ValueError(f"The value of 'weights_init' must be in {{{', '.join(poss)}}}.")
+        if bias_init not in poss:
+            raise ValueError(f"The value of 'bias_init' must be in {{{', '.join(poss)}}}.")
 
     def _init_weigths_and_bias(self, w_init: str, b_init: str) -> tuple:
         """
@@ -106,23 +122,46 @@ class Dense:
         """
         # compute the output of the layer
         z = np.dot(input_data, self.weights) + self.bias
-        # compute and return the activation values of the output
-        return self.activation_function(z)
+        # compute the activation values of the output
+        a = self.activation_function(z)
+        # dropout (return activated values with dropout)
+        idx = np.random.permutation(self.output_size)[:self.num_drop]
+        a[:,idx] = np.zeros((input_data.shape[0], 1))
+        return a
+
+    def backward(self, error: float, alpha: float) -> float:
+        """
+        ...
+
+        Parameters
+        ----------
+        error: float
+            ...
+        alpha: float
+            ...
+        """
+        # temporary (just so that nn works)
+        return 0.01
 
 
 if __name__ == "__main__":
 
-    from activation import softmax
+    import sys
+    sys.path.append("../io")
+    from activation import relu, softmax
+    from csv_file import read_csv_file
 
-    l1 = Dense(2, 1)
-    out1 = l1.forward(np.array([[1,3], [2,4]]))
-    print(out1)
-
-    l2 = Dense(2, 1, weights_init="zeros", bias_init="random")
+    # modified param_init and activation
+    print("EX1")
+    l2 = Dense(2, 1, weights_init="zeros", bias_init="random", activation_function=softmax)
     out2 = l2.forward(np.array([[1,3], [2,4]]))
     print(out2)
 
-    l3 = Dense(2, 1, activation_function=softmax)
-    out3 = l3.forward(np.array([[1,3], [2,4]]))
-    print(out3)
+    # cpu (with dropout)
+    print("\nEX2 - cpu")
+    path = "../../../datasets/cpu/cpu.csv"
+    cpu = read_csv_file(path, sep=",", features=True, label=True)
+    layer_cpu = Dense(6, 4, activation_function=relu, dropout=0.5)
+    out_cpu = layer_cpu.forward(cpu.X)
+    print(out_cpu)
 

@@ -52,7 +52,7 @@ class NN:
         fitted: bool
             Wheter 'NN' is already fitted
         history: dict
-            A dictionary object storing the value of the loss function at each epoch
+            A dictionary object storing the values of the loss function at each epoch
         """
         # check numeric parameters
         self._check_init(epochs, num_batches, alpha)
@@ -119,8 +119,8 @@ class NN:
 
     def fit(self, dataset: Dataset) -> "NN":
         """
-        Fits the model to the dataset using forward propagation along its layers.
-        Returns self.
+        Fits the model to the dataset using forward and backward propagation along its layers.
+        This process is repeated <self.epochs> times. Returns self.
 
         Parameters
         ----------
@@ -134,7 +134,7 @@ class NN:
             # initialize an empty dictionary for every epoch
             self.history[epoch] = {}
             # go through every batch of data
-            for i, (x, y) in enumerate(zip(x_batches, y_batches), start=1):
+            for batch, (x, y) in enumerate(zip(x_batches, y_batches), start=1):
                 # forward -> the output of one layer is the input of its successor
                 for layer in self.layers:
                     x = layer.forward(x)
@@ -145,7 +145,7 @@ class NN:
                     error = layer.backward(error, self.alpha)
                 # save batch loss in history
                 loss = self.loss_function(y, x)
-                self.history[epoch][i] = loss
+                self.history[epoch][batch] = loss
             # print loss (mean of losses at epoch <epoch>)
             if self.verbose:
                 mean_loss = np.mean(list(self.history[epoch].values()))

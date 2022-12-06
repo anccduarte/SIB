@@ -107,10 +107,10 @@ class NN:
             s_msg = f" Setting 'num_batches' to {num_examples}..."
             warnings.warn(w_msg+s_msg, Warning)
             self.num_batches = num_examples
-        # get permutations and shuffle the dataset
+        # get permutations, shuffle the dataset and reshape dataset.y
         shuffle = np.random.RandomState(seed=self.random_state).permutation(num_examples)
         x = dataset.X.copy()[shuffle]
-        y = dataset.y.copy()[shuffle]
+        y = dataset.y.copy().reshape(-1, 1)[shuffle]
         # get batches
         size_batch = num_examples // self.num_batches
         x_batches = [x[i:i+size_batch] for i in range(0, num_examples, size_batch)]
@@ -135,16 +135,18 @@ class NN:
             self.history[epoch] = {}
             # go through every batch of data
             for batch, (x, y) in enumerate(zip(x_batches, y_batches), start=1):
+                # copy batches so that x_batches is not altered
+                x_cp = x.copy()
                 # forward -> the output of one layer is the input of its successor
                 for layer in self.layers:
-                    x = layer.forward(x)
+                    x_cp = layer.forward(x_cp)
                 # compute error
-                error = self.loss_derivative(y, x)
+                error = self.loss_derivative(y, x_cp)
                 # backpropagate error
                 for layer in self.layers[::-1]:
                     error = layer.backward(error, self.alpha)
                 # save batch loss in history
-                loss = self.loss_function(y, x)
+                loss = self.loss_function(y, x_cp)
                 self.history[epoch][batch] = loss
             # print loss (mean of losses at epoch <epoch>)
             if self.verbose:
@@ -185,8 +187,6 @@ if __name__ == "__main__":
     # -- split data into train and test when NN is complete --
 
     # layers
-    # if SigmoidActivation is implemented in its own class:
-    # layers = [l1, SigmoidActivation(), l2, SigmoidActivation()]
     l1 = Dense(input_size=6, output_size=4, activation_function=relu)
     l2 = Dense(input_size=4, output_size=1, activation_function=identity)
     layers = [l1, l2]

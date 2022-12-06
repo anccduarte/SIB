@@ -27,7 +27,7 @@ class Dataset:
         if y is not None:
             if X.shape[0] != y.size:
                 raise ValueError("The number of examples in 'X' must be equal to the size of 'y'.")
-        self.X = X
+        self.X = X if X.ndim > 1 else np.reshape(X, (-1, 1))
         self.y = y
         self.features = [f"feat{i+1}" for i in range(X.shape[1])] if features is None else features
         self.label = "label" if (y is not None and label is None) else label

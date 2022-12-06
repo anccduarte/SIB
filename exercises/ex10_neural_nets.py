@@ -1,7 +1,7 @@
 
 import numpy as np
 import sys
-PATHS = ["../src/si/data", "../src/si/neural_networks"]
+PATHS = ["../src/si/data", "../src/si/neural_networks", "../src/si/metrics"]
 sys.path.extend(PATHS)
 from activation import identity, relu, sigmoid, softmax
 from dataset import Dataset

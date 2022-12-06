@@ -42,6 +42,8 @@ class Dense:
 
         Attributes
         ----------
+        X: np.ndarray
+            The input data to forward propagate at each epoch
         weights: np.ndarray
             The weights matrix used in training
         bias: np.ndarray
@@ -57,9 +59,7 @@ class Dense:
         self.activation_function = activation_function
         self.random_state = random_state
         # attributes
-        # if, initially, weights are set randomly and bias is initialized as a vector of zeros:
-        # self.weights = np.random.randn(input_size, output_size) * 0.01
-        # self.bias = np.zeros((1,output_size))
+        self.X = None
         self.weights, self.bias = self._init_weigths_and_bias(weights_init, bias_init)
         self.num_drop = int(dropout * self.output_size)
 
@@ -67,6 +67,19 @@ class Dense:
     def _check_init(input_size, output_size, weights_init, bias_init, dropout):
         """
         Checks values of parameters of type numeric and 'str' when initializing an instance.
+
+        Parameters
+        ----------
+        input_size: int
+            The number of nodes of the input
+        output_size: int
+            The number of nodes of the output
+        weights_init: str
+            The initializer for the weights matrix
+        bias_init: str
+            The initializer for the bias vector
+        dropout: float
+            The percentage of neurons turned off in the layer at each step of trainig
         """
         # check values (numeric)
         if input_size < 1:
@@ -120,16 +133,18 @@ class Dense:
         input_data: np.ndarray
             The layer's input data
         """
+        # update self.X so that it can be used in 'backward'
+        self.X = input_data
         # compute the output of the layer
-        z = np.dot(input_data, self.weights) + self.bias
+        z = np.dot(self.X, self.weights) + self.bias
         # compute the activation values of the output
         a = self.activation_function(z)
         # dropout (return activated values with dropout)
         idx = np.random.permutation(self.output_size)[:self.num_drop]
-        a[:,idx] = np.zeros((input_data.shape[0], 1))
+        a[:,idx] = np.zeros((self.X.shape[0], 1))
         return a
 
-    def backward(self, error: float, alpha: float) -> float:
+    def backward(self, error: float, alpha: float) -> np.ndarray:
         """
         ...
 
@@ -140,8 +155,9 @@ class Dense:
         alpha: float
             ...
         """
-        # temporary (just so that nn works)
-        return 0.01
+        # self.weights -= alpha * np.dot(self.X.T, error)
+        # temporary (just so that NN works)
+        return error
 
 
 if __name__ == "__main__":

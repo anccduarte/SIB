@@ -12,7 +12,7 @@ class KMer:
     k-mers of all sequences in a given dataset.
     """
 
-    def __init__(self, k: int = 3, alphabet: str = "ATCG"):
+    def __init__(self, k: int = 3, mol_type: str = "dna"):
         """
         Initializes an instance of KMer. KMer implements a feature extraction algorithm which computes
         the normalized frequencies of the k-mers of all sequences in a given dataset.
@@ -21,23 +21,29 @@ class KMer:
         ----------
         k: int (default=3)
             The length of the k-mers
-        alphabet: str (default="ATCG")
-            The alphabet to be used when generating an array of all combinations of length <k>
+        mol_type: str (default="dna")
+            Molecular type to be considered when choosing which alphabet to use
 
         Attributes
         ----------
         fitted: bool
             Whether KMer is already fitted
+        alphabet: str
+            The alphabet to be used when generating an array of all combinations of length <k>. Depends
+            on mol_type (default="dna")
         k_mers: list
             A list containing all possible combinations of k-mers (length <k>)
         """
-        # parameters
+        # check parameter values
         if k < 1:
             raise ValueError("The value of 'k' must be a positive integer.")
+        if mol_type not in ["dna", "protein"]:
+            raise ValueError("The value of 'mol_type' must be in {'dna', 'protein'}.")
+        # parameters
         self.k = k
-        self.alphabet = list(alphabet.upper())
         # attributes
         self.fitted = False
+        self.alphabet = list("ATCG") if mol_type == "dna" else list("ACDEFGHIKLMNPQRSTVWY")
         self.k_mers = None
 
     def fit(self, dataset: Dataset) -> "KMer":
@@ -143,7 +149,7 @@ if __name__ == "__main__":
     path2 = "../../../datasets/transporters/transporters.csv"
     transporters = read_csv_file(path2, sep=",", features=True, label=True)
     # compute new Dataset with k-mer frequencies as features
-    km2 = KMer(k=2, alphabet="ACDEFGHIKLMNPQRSTVWY")
+    km2 = KMer(k=2, mol_type="protein")
     transporters_km = km2.fit_transform(transporters)
     # scale and split
     transporters_km.X = StandardScaler().fit_transform(transporters_km.X)

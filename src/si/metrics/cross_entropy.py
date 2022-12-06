@@ -29,16 +29,16 @@ def cross_entropy_derivative(y_true: np.ndarray, y_pred: np.ndarray) -> float:
         The predicted labels of the dataset
     """
     N = y_true.shape[0]
-    return np.sum(1 / y_pred) / N
+    return -y_true / (y_pred * N)
 
 
 if __name__ == "__main__":
 
 	# ERROR -> division by 0
     true = np.array([0,1,1,1,0,1])
-    pred = np.array([1,0,1,1,0,1])
+    pred = np.array([1,1,1,1,1,1])
     # Cross-Entropy
     print(f"Cross-Entropy: {cross_entropy(true, pred):.4f}")
     # Cross-Entropy derivative with respect to y_pred
-    print(f"d(Cross-Entropy)/d(y_pred): {cross_entropy_derivative(true, pred):.4f}")
+    print(f"d(Cross-Entropy)/d(y_pred): {cross_entropy_derivative(true, pred)}")
 

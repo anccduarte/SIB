@@ -1,13 +1,23 @@
 
 import numpy as np
-from activation import sigmoid
+from activation import identity, relu, sigmoid, softmax, tanh
+from activation import d_identity, d_relu, d_sigmoid, d_softmax, d_tanh
 from typing import Callable
+
+# activation functions and derivatives
+ACTIVATION = {"identity": (identity, d_identity),
+              "relu": (relu, d_relu),
+              "sigmoid": (sigmoid, d_sigmoid),
+              "softmax": (softmax, d_softmax),
+              "tanh": (tanh, d_tanh)}
 
 class Dense:
     
     """
     Implements a densely-connected neural network layer. Initially, weights and bias are set
-    as chosen by the user (choices are restricted to "random", "zeros" or "ones").
+    as chosen by the user (choices are restricted to "random", "zeros" or "ones"). An activation
+    function is applied to the output of the layer (by default, "identity"). A dropout function
+    can be used to prevent overfitting (by default, dropout=0.0).
     """
 
     def __init__(self,
@@ -15,13 +25,15 @@ class Dense:
                  output_size: int,
                  weights_init: str = "random",
                  bias_init: str = "zeros",
-                 activation_function : Callable = sigmoid,
+                 activation: str = "identity",
                  dropout: float = 0.0,
                  random_state: int = None):
         """
         Initializes an instance of Dense. It implements a densely-connected neural network layer.
         Initially, weights and bias are set as chosen by the user (choices are restricted to
-        "random", "zeros" or "ones").
+        "random", "zeros" or "ones"). An activation function is applied to the output of the layer
+        (by default, "identity"). A dropout function can be used to prevent overfitting (by default,
+        dropout=0).
 
         Parameters
         ----------
@@ -33,8 +45,8 @@ class Dense:
             The initializer for the weights matrix
         bias_init: str (default="zeros")
             The initializer for the bias vector
-        activation_function: callable (default=sigmoid)
-            The activation function to be used
+        activation: str (default="identity")
+            The name of the activation function to be used
         dropout: float (default=0.0)
             The percentage of neurons turned off in the layer at each step of trainig
         random_state: int (default=None)
@@ -42,29 +54,36 @@ class Dense:
 
         Attributes
         ----------
-        X: np.ndarray
-            The input data to forward propagate at each epoch
+        dense_input: np.ndarray
+            The input of the "dense layer"
+        activation_input: np.ndarray
+            The input of the "activation layer"
         weights: np.ndarray
             The weights matrix used in training
         bias: np.ndarray
             The bias vector used in training
+        activation: callable
+            The activation function to be used
+        d_activation: callable
+            The derivative of the activation function
         num_drop: int
-            The number of neurons turned off in the layer at each step of training
+            The number of neurons to be turned off at each step of training
         """
         # check values of parameters
-        self._check_init(input_size, output_size, weights_init, bias_init, dropout)
+        self._check_init(input_size, output_size, weights_init, bias_init, activation, dropout)
         # parameters
         self.input_size = input_size
         self.output_size = output_size
-        self.activation_function = activation_function
         self.random_state = random_state
         # attributes
-        self.X = None
+        self.dense_input = None
+        self.activation_input = None
         self.weights, self.bias = self._init_weigths_and_bias(weights_init, bias_init)
+        self.activation, self.d_activation = ACTIVATION[activation]
         self.num_drop = int(dropout * self.output_size)
 
     @staticmethod
-    def _check_init(input_size, output_size, weights_init, bias_init, dropout):
+    def _check_init(input_size, output_size, weights_init, bias_init, activation, dropout):
         """
         Checks values of parameters of type numeric and 'str' when initializing an instance.
 
@@ -78,6 +97,8 @@ class Dense:
             The initializer for the weights matrix
         bias_init: str
             The initializer for the bias vector
+        activation: str
+            The name of the activation function to be used
         dropout: float
             The percentage of neurons turned off in the layer at each step of trainig
         """
@@ -89,11 +110,15 @@ class Dense:
         if dropout < 0 or dropout >= 1:
             raise ValueError("The value of 'dropout' must be in [0,1).")
         # check values (initializers)
-        poss = ["random", "zeros", "ones"]
-        if weights_init not in poss:
-            raise ValueError(f"The value of 'weights_init' must be in {{{', '.join(poss)}}}.")
-        if bias_init not in poss:
-            raise ValueError(f"The value of 'bias_init' must be in {{{', '.join(poss)}}}.")
+        poss_init = ["random", "zeros", "ones"]
+        if weights_init not in poss_init:
+            raise ValueError(f"The value of 'weights_init' must be in {{{', '.join(poss_init)}}}.")
+        if bias_init not in poss_init:
+            raise ValueError(f"The value of 'bias_init' must be in {{{', '.join(poss_init)}}}.")
+        # check values (activation)
+        poss_activation = ["identity", "relu", "sigmoid", "softmax", "tanh"]
+        if activation not in poss_activation:
+            raise ValueError(f"The value of 'activation' must be in {{{', '.join(poss_activation)}}}")
 
     def _init_weigths_and_bias(self, w_init: str, b_init: str) -> tuple:
         """
@@ -133,51 +158,59 @@ class Dense:
         input_data: np.ndarray
             The layer's input data
         """
-        # update self.X so that it can be used in 'backward'
-        self.X = input_data
-        # compute the output of the layer
-        z = np.dot(self.X, self.weights) + self.bias
+        # compute the output of the layer (dense)
+        z = np.dot(input_data, self.weights) + self.bias
         # compute the activation values of the output
-        a = self.activation_function(z)
+        a = self.activation(z)
         # dropout (return activated values with dropout)
         idx = np.random.permutation(self.output_size)[:self.num_drop]
-        a[:,idx] = np.zeros((self.X.shape[0], 1))
+        a[:,idx] = np.zeros((input_data.shape[0], 1))
+        # add instance attributes so that they can be used in 'backward'
+        self.dense_input = input_data
+        self.activation_input = z
+        # return the "activated" output
         return a
 
-    def backward(self, error: float, alpha: float) -> np.ndarray:
+    def backward(self, error: np.ndarray, alpha: float) -> np.ndarray:
         """
-        ...
+        Backpropagates the error through the activation and dense "layers". Computes the "dense
+        layer" error (error * f'(x)), updates the weights matrix and bias vector, and computes the
+        error to propagate to the previous layer (error @ w.T). Returns the error to propagate.
 
         Parameters
         ----------
-        error: float
-            ...
+        error: np.ndarray
+            The error propagated to the layer
         alpha: float
-            ...
+            The learning rate of the model
         """
-        # self.weights -= alpha * np.dot(self.X.T, error)
-        # temporary (just so that NN works)
-        return error
+        # get dense error (error * f'(x))
+        error_prop_1 = error * self.d_activation(self.activation_input)
+        # update weights and bias of dense
+        self.weights -= alpha * np.dot(self.dense_input.T, error_prop_1)
+        self.bias -= alpha * np.sum(error_prop_1, axis=0)
+        # compute and return the error to propagate to the next layer
+        error_prop_2 = np.dot(error_prop_1, self.weights.T)
+        return error_prop_2
 
 
 if __name__ == "__main__":
 
     import sys
     sys.path.append("../io")
-    from activation import relu, softmax
     from csv_file import read_csv_file
 
     # modified param_init and activation
     print("EX1")
-    l2 = Dense(2, 1, weights_init="zeros", bias_init="random", activation_function=softmax)
-    out2 = l2.forward(np.array([[1,3], [2,4]]))
-    print(out2)
+    l = Dense(2, 1, weights_init="zeros", bias_init="random", activation="softmax")
+    out = l.forward(np.array([[1,3], [2,4]]))
+    print(out)
 
     # cpu (with dropout)
     print("\nEX2 - cpu")
     path = "../../../datasets/cpu/cpu.csv"
     cpu = read_csv_file(path, sep=",", features=True, label=True)
-    layer_cpu = Dense(6, 4, activation_function=relu, dropout=0.5)
+    layer_cpu = Dense(6, 4, activation="relu", dropout=0.5)
     out_cpu = layer_cpu.forward(cpu.X)
     print(out_cpu)
 

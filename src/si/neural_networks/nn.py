@@ -109,12 +109,16 @@ class NN:
             self.num_batches = num_examples
         # get permutations, shuffle the dataset and reshape dataset.y
         shuffle = np.random.RandomState(seed=self.random_state).permutation(num_examples)
-        x = dataset.X.copy()[shuffle]
-        y = dataset.y.copy().reshape(-1, 1)[shuffle]
+        x = dataset.X[shuffle]
+        y = dataset.y.reshape(-1, 1)[shuffle]
         # get batches
         size_batch = num_examples // self.num_batches
         x_batches = [x[i:i+size_batch] for i in range(0, num_examples, size_batch)]
         y_batches = [y[i:i+size_batch] for i in range(0, num_examples, size_batch)]
+        # fix last batch (if the batch size is too small, concatenate to second-last batch)
+        if num_examples % self.num_batches < size_batch // 2:
+            x_batches[-1] = np.concatenate((x_batches[-2], x_batches.pop(-1)), axis=0)
+            y_batches[-1] = np.concatenate((y_batches[-2], y_batches.pop(-1)), axis=0)
         return x_batches, y_batches
 
     def fit(self, dataset: Dataset) -> "NN":
@@ -135,18 +139,19 @@ class NN:
             self.history[epoch] = {}
             # go through every batch of data
             for batch, (x, y) in enumerate(zip(x_batches, y_batches), start=1):
-                # copy batches so that x_batches is not altered
-                x_cp = x.copy()
+                # copy x so that x_batches is not altered
+                # y_pred (last layer -> predictions)
+                y_pred = x.copy()
                 # forward -> the output of one layer is the input of its successor
                 for layer in self.layers:
-                    x_cp = layer.forward(x_cp)
+                    y_pred = layer.forward(y_pred)
                 # compute error
-                error = self.loss_derivative(y, x_cp)
+                error = self.loss_derivative(y, y_pred)
                 # backpropagate error
                 for layer in self.layers[::-1]:
                     error = layer.backward(error, self.alpha)
                 # save batch loss in history
-                loss = self.loss_function(y, x_cp)
+                loss = self.loss_function(y, y_pred)
                 self.history[epoch][batch] = loss
             # print loss (mean of losses at epoch <epoch>)
             if self.verbose:
@@ -167,35 +172,27 @@ class NN:
         if not self.fitted:
             raise Warning("Fit 'NN' before calling 'predict'.")
         # forward propagate with learned parameters
-        x = dataset.X.copy()
+        y_pred = dataset.X.copy()
         for layer in self.layers:
-            x = layer.forward(x)
-        return x
+            y_pred = layer.forward(y_pred)
+        # reshape y_pred to an array of one row (=dataset.y)
+        return y_pred.reshape(dataset.y.shape)
+
+    def score(self, dataset: Dataset, score_func: Callable) -> float:
+        """
+        Computes and returns the score of the model on the given dataset.
+
+        Parameters
+        ----------
+        dataset: Dataset
+            A Dataset object (the dataset to compute the score on)
+        score_func: callable
+            The scoring function to be used
+        """
+        y_pred = self.predict(dataset)
+        return score_func(dataset.y, y_pred)
 
 
 if __name__ == "__main__":
-
-    sys.path.append("../io")
-    from activation import identity, relu
-    from csv_file import read_csv_file
-    from dense import Dense
-
-    # data (cpu)
-    path = "../../../datasets/cpu/cpu.csv"
-    cpu = read_csv_file(path, sep=",", features=True, label=True)
-
-    # -- split data into train and test when NN is complete --
-
-    # layers
-    l1 = Dense(input_size=6, output_size=4, activation_function=relu)
-    l2 = Dense(input_size=4, output_size=1, activation_function=identity)
-    layers = [l1, l2]
-
-    # NN model
-    nn_model = NN(layers=layers, epochs=10, num_batches=4, verbose=True)
-    # -- use train and test when NN is complete --
-    nn_model.fit(cpu)
-    preds = nn_model.predict(cpu)
-    print("\nPredictions:")
-    print(preds)
+    ...
 

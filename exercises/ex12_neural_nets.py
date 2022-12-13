@@ -48,7 +48,7 @@ tst_score_cpu = nn_cpu.score(dataset=cpu_tst, score_func=r2_score)
 print(f"Test score (r2_score): {tst_score_cpu:.2%}")
 
 
-# -- NN BINARY CLASSIFICATION (breast-bin.csv) -> cross-entropy
+# -- NN BINARY CLASSIFICATION (breast-bin.csv) -> cross_entropy / cross_entropy_derivative
 
 time.sleep(5)
 print("\nNN BINARY CLASSIFICATION (breast-bin)")
@@ -70,21 +70,21 @@ layers_breast = [l1_breast, l2_breast]
 
 # NN model
 nn_breast = NN(layers=layers_breast,
-			   alpha=0.0001,
-			   loss_function=cross_entropy,
-			   loss_derivative=cross_entropy_derivative,
-			   epochs=10000,
-			   num_batches=4,
-			   verbose=True)
+               alpha=0.0001,
+               loss_function=cross_entropy,
+               loss_derivative=cross_entropy_derivative,
+               epochs=10000,
+               num_batches=4,
+               verbose=True)
 
 # fit model
 nn_breast.fit(breast_trn)
 
 # transform predictions to binary
 def to_bin(preds):
-	mask = preds < 0.5
-	preds[mask] = 0
-	preds[~mask] = 1
+    mask = preds < 0.5
+    preds[mask] = 0
+    preds[~mask] = 1
 
 # get accuracy scores (train) -> very low score (?)
 preds_trn = nn_breast.predict(breast_trn)

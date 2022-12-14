@@ -7,7 +7,6 @@ import sys
 sys.path.extend(PATHS)
 import time
 from accuracy import accuracy
-from cross_entropy import cross_entropy, cross_entropy_derivative
 from csv_file import read_csv_file
 from dataset import Dataset
 from dense import Dense
@@ -48,17 +47,16 @@ tst_score_cpu = nn_cpu.score(dataset=cpu_tst, score_func=r2_score)
 print(f"Test score (r2_score): {tst_score_cpu:.2%}")
 
 
-# -- NN BINARY CLASSIFICATION (breast-bin.csv) -> cross_entropy / cross_entropy_derivative
+# -- NN BINARY CLASSIFICATION (breast-bin.csv) -> binary_cross_entropy / d_binary_cross_entropy
 
-time.sleep(5)
+time.sleep(2)
 print("\nNN BINARY CLASSIFICATION (breast-bin)")
 
 # data (breast)
 path_breast = "../datasets/breast/breast-bin.csv"
 breast = read_csv_file(path_breast, sep=",", features=False, label=True)
 
-# standardize data
-# breast.X = StandardScaler().fit_transform(breast.X)
+# cannot standardize data -> only discrete values
 
 # split data into train and test
 breast_trn, breast_tst = train_test_split(breast, random_state=2)
@@ -71,10 +69,9 @@ layers_breast = [l1_breast, l2_breast]
 # NN model
 nn_breast = NN(layers=layers_breast,
                alpha=0.0001,
-               loss_function=cross_entropy,
-               loss_derivative=cross_entropy_derivative,
+               loss="binary_cross_entropy",
                epochs=10000,
-               num_batches=4,
+               num_batches=6,
                verbose=True)
 
 # fit model
@@ -86,13 +83,13 @@ def to_bin(preds):
     preds[mask] = 0
     preds[~mask] = 1
 
-# get accuracy scores (train) -> very low score (?)
+# get accuracy scores (train)
 preds_trn = nn_breast.predict(breast_trn)
 to_bin(preds_trn)
 trn_score_breast = accuracy(breast_trn.y, preds_trn)
 print(f"Train score (accuracy): {trn_score_breast:.2%}")
 
-# get accuracy scores (test) -> very low score (?)
+# get accuracy scores (test)
 preds_tst = nn_breast.predict(breast_tst)
 to_bin(preds_tst)
 tst_score_breast = accuracy(breast_tst.y, preds_tst)

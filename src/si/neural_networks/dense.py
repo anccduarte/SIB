@@ -62,9 +62,9 @@ class Dense:
             The weights matrix used in training
         bias: np.ndarray
             The bias vector used in training
-        activation: callable
+        activation_function: callable
             The activation function to be used
-        d_activation: callable
+        activation_derivative: callable
             The derivative of the activation function
         num_drop: int
             The number of neurons to be turned off at each step of training
@@ -79,7 +79,7 @@ class Dense:
         self.dense_input = None
         self.activation_input = None
         self.weights, self.bias = self._init_weigths_and_bias(weights_init, bias_init)
-        self.activation, self.d_activation = ACTIVATION[activation]
+        self.activation_function, self.activation_derivative = ACTIVATION[activation]
         self.num_drop = int(dropout * self.output_size)
 
     @staticmethod
@@ -161,7 +161,7 @@ class Dense:
         # compute the output of the layer (dense)
         z = np.dot(input_data, self.weights) + self.bias
         # compute the activation values of the output
-        a = self.activation(z)
+        a = self.activation_function(z)
         # dropout (return activated values with dropout)
         idx = np.random.permutation(self.output_size)[:self.num_drop]
         a[:,idx] = np.zeros((input_data.shape[0], 1))
@@ -185,7 +185,7 @@ class Dense:
             The learning rate of the model
         """
         # get dense error (error * f'(x))
-        error_prop_1 = error * self.d_activation(self.activation_input)
+        error_prop_1 = error * self.activation_derivative(self.activation_input)
         # update weights and bias of dense
         self.weights -= alpha * np.dot(self.dense_input.T, error_prop_1)
         self.bias -= alpha * np.sum(error_prop_1, axis=0)

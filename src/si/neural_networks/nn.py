@@ -4,9 +4,16 @@ import sys
 PATHS = ["../data", "../metrics"]
 sys.path.extend(PATHS)
 import warnings
+from cross_entropy import binary_cross_entropy, d_binary_cross_entropy
+from cross_entropy import categorical_cross_entropy, d_categorical_cross_entropy
 from dataset import Dataset
 from mse import mse, mse_derivative
 from typing import Callable, Union
+
+# loss functions and the respective derivatives
+LOSS = {"mse": (mse, mse_derivative),
+        "binary_cross_entropy": (binary_cross_entropy, d_binary_cross_entropy),
+        "categorical_cross_entropy": (categorical_cross_entropy, d_categorical_cross_entropy)}
 
 class NN:
 
@@ -19,8 +26,7 @@ class NN:
                  epochs: int = 1000,
                  num_batches: int = 10,
                  alpha: float = 0.001,
-                 loss_function: Callable = mse,
-                 loss_derivative: Callable = mse_derivative,
+                 loss: str = "mse",
                  random_state: int = None,
                  verbose: bool = False):
         """
@@ -38,10 +44,8 @@ class NN:
             number of examples in the training dataset, num_batches := num_batches + 1.
         alpha: float (default=0.001)
             The learning-rate used in training
-        loss_function: callable (default=mse)
-            The loss function used to backpropagate the error
-        loss_derivative: callable (default=mse_derivative)
-            The derivative of the loss function
+        loss: str (default="mse")
+            The name of the loss function to be used
         random_state: int (default=None)
             Controls the shuffling of the dataset before the split into batches
         verbose: bool (default=False)
@@ -51,28 +55,31 @@ class NN:
         ----------
         fitted: bool
             Wheter 'NN' is already fitted
+        loss_function: callable
+            The loss function used to backpropagate the error
+        loss_derivative: callable
+            The derivative of the loss function
         history: dict
             A dictionary object storing the values of the loss function at each epoch
         """
         # check numeric parameters
-        self._check_init(epochs, num_batches, alpha)
+        self._check_init(epochs, num_batches, alpha, loss)
         # parameters
         self.layers = layers
         self.epochs = epochs
         self.num_batches = num_batches
         self.alpha = alpha
-        self.loss_function = loss_function
-        self.loss_derivative = loss_derivative
         self.random_state = random_state
         self.verbose = verbose
         # attributes
         self.fitted = False
+        self.loss_function, self.loss_derivative = LOSS[loss]
         self.history = {}
 
     @staticmethod
-    def _check_init(epochs, num_batches, alpha):
+    def _check_init(epochs, num_batches, alpha, loss):
         """
-        Checks values of numeric type parameters when initializing an instance.
+        Checks values of numeric and 'str' parameters when initializing an instance.
 
         Parameters
         ----------
@@ -82,13 +89,20 @@ class NN:
             The number of batches to use when spliting the training data
         alpha: float
             The learning-rate used in training
+        loss: str
+            The name of the loss function to be used
         """
+        # check values (numeric)
         if epochs < 1:
             raise ValueError("The value of 'epochs' must be a positive integer.")
         if num_batches < 1:
             raise ValueError("The value of 'num_batches' must be a positive integer.")
         if alpha <= 0 or alpha > 1:
             raise ValueError("The value of 'alpha' must be in (0,1].")
+        # check values (str)
+        loss_poss = ["mse", "binary_cross_entropy", "categorical_cross_entropy"]
+        if loss not in loss_poss:
+            raise ValueError(f"The value of 'loss' must be in {{{', '.join(loss_poss)}}}.")
 
     def _get_batches(self, dataset: Dataset) -> tuple:
         """

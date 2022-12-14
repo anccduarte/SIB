@@ -79,13 +79,15 @@ class LogisticRegression:
         1. Predicts the outputs of the dataset
             -> X @ theta + theta_zero (it then uses the sigomid function)
         2. Computes the gradient vector and adjusts it according to the value of alpha
-            -> (alpha / m) * (y_pred - y_true) @ X
-        3. Computes the penalization term
+            -> -(alpha / m) * [(y_true / y_pred) @ X - ((1 - y_true) / (1 - y_pred)) @ X]
+        3. Computes the penalization term for theta
             -> theta * alpha * (l2 / m)
         4. Updates theta
             -> theta = theta - gradient - penalization
-        5. Updates theta_zero
-            -> theta_zero = theta_zero - (alpha / m) * SUM[y_pred - y_true] * X(0), X(0) = [1,1,...,1]
+        5. Computes gradient for theta_zero
+            -> -(alpha / m) * SUM[(y_true / y_pred) - ((1 - y_true) / (1 - y_pred))]
+        6. Updates theta_zero
+            -> theta_zero = theta_zero - gradient_zero
 
         Parameters
         ----------
@@ -96,14 +98,19 @@ class LogisticRegression:
         """
         # predicted y (uses the sigmoid function)
         y_pred = sigmoid_function(np.dot(dataset.X, self.theta) + self.theta_zero)
-        # computing the gradient vector given a learning rate alpha
+        # compute the gradient vector (of theta) given a learning rate alpha
         # vector of shape (n_features,) -> gradient[k] updates self.theta[k]
-        gradient = (self.alpha / m) * np.dot(y_pred - dataset.y, dataset.X)
-        # computing the penalization term
+        grad_prod_1 = np.dot(dataset.y / y_pred, dataset.X)
+        grad_prod_2 = np.dot((1 - dataset.y) / (1 - y_pred), dataset.X)
+        gradient = -(self.alpha / m) * (grad_prod_1 - grad_prod_2)
+        # compute the penalization term
         penalization_term = self.theta * self.alpha * (self.l2_penalty / m)
-        # updating the model parameters (theta and theta_zero)
+        # update theta
         self.theta = self.theta - gradient - penalization_term
-        self.theta_zero = self.theta_zero - (self.alpha / m) * np.sum(y_pred - dataset.y)
+        # compute theta_zero gradient (penalization term is 0)
+        gradient_zero = -(self.alpha / m) * np.sum((dataset.y / y_pred) - ((1 - dataset.y) / (1 - y_pred)))
+        # update theta_zero
+        self.theta_zero = self.theta_zero - gradient_zero
 
     def _regular_fit(self, dataset: Dataset) -> "LogisticRegression":
         """
@@ -241,8 +248,10 @@ if __name__ == "__main__":
     breast_trn, breast_tst = train_test_split(breast, test_size=0.3, random_state=2)
     breast_logistic = LogisticRegression(l2_penalty=1, alpha=0.001, max_iter=2000, tolerance=0.0001, adaptative_alpha=False)
     breast_logistic = breast_logistic.fit(breast_trn)
-    predictions = breast_logistic.predict(breast_tst)
-    score = breast_logistic.score(breast_tst)
-    print(f"Predictions:\n{predictions}")
-    print(f"\nScore: {score*100:.2f}%")
+    #predictions = breast_logistic.predict(breast_tst)
+    #print(f"Predictions:\n{predictions}")
+    score_trn = breast_logistic.score(breast_trn)
+    score_tst = breast_logistic.score(breast_tst)
+    print(f"Train score (accuracy): {score_trn:.2%}")
+    print(f"Test score (accuracy): {score_tst:.2%}")
 

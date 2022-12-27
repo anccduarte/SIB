@@ -48,11 +48,12 @@ def write_csv_file(nfile: str, dataset: Dataset, sep: str, label: bool) -> None:
         Representative of the presence of a label in the Dataset object
     """
     df = pd.DataFrame(dataset.X)
+    # by default, all Dataset objects have feature names
     df.columns = dataset.features
     if label:
         df = pd.concat([df, pd.Series(dataset.y)], axis=1)
         df.columns = dataset.features + [dataset.label]
-    df.to_csv(nfile, sep)
+    df.to_csv(nfile, sep=sep)
     
 
 if __name__ == "__main__":
@@ -61,7 +62,8 @@ if __name__ == "__main__":
     path1 = "../../../datasets/iris/iris.csv"
     ds = read_csv_file(file=path1, sep=",", features=True, label=True)
     print(ds.X.shape, ds.y.shape)
+    print(ds.features, ds.label)
     # write_csv
-    path2 = "~/Downloads/SIB/bin/new_iris.csv"
-    write_csv_file(nfile=path2, dataset=ds, sep=",", label=True)
+    # path2 = "~/Downloads/SIB/bin/new_iris.csv"
+    # write_csv_file(nfile=path2, dataset=ds, sep=",", label=True)
 

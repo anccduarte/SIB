@@ -19,6 +19,8 @@ def f_classification(dataset: Dataset) -> Tuple[np.ndarray, np.ndarray]:
     dataset: Dataset
         A labeled Dataset object
     """
+    if dataset.y is None:
+        raise ValueError("'f_classification' requires the dataset to be labeled.")
     classes = dataset.get_classes()
     groups = [dataset.X[dataset.y == c] for c in classes]
     F, p = stats.f_oneway(*groups)
@@ -28,7 +30,7 @@ def f_classification(dataset: Dataset) -> Tuple[np.ndarray, np.ndarray]:
 if __name__ == "__main__":
     
     # 3 columns => len(F) = len(p) = 3
-    # each column of each class is compared to the respetive columns of the remaining classes (???)
+    # each column of each class is compared to the respetive columns of the remaining classes
     # i.e., [1,4] is compared to [7,4], [2,5] to [8,3], and [3,6] to [9,7]
     ds = Dataset(np.array([[1,2,3],[4,5,6],[7,8,9],[4,3,7]]), np.array([1,1,0,0]))
     # ds = Dataset(np.array([[1],[4],[7],[4]]), np.array([1,1,0,0]))

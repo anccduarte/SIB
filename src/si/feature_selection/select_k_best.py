@@ -10,14 +10,14 @@ from typing import Callable
 class SelectKBest:
 
     """
-    Selects features according to the k highest scores.
+    Selects features according to the k highest scores provided by a given scoring function.
     Feature ranking is performed by computing the scores of each feature using a scoring function:
         - f_classification: ANOVA F-value of each feature with examples grouped by label
     """
 
     def __init__(self, score_func: Callable = f_classification, k: int = 10):
         """
-        Selects features according to the k highest scores.
+        Selects features according to the k highest scores provided by a given scoring function.
         Feature ranking is performed by computing the scores of each feature using a scoring function:
             - f_classification: ANOVA F-value of each feature with examples grouped by label
 

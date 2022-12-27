@@ -18,22 +18,43 @@ class Dataset:
         Parameters
         ----------
         X: np.ndarray
-            The matrix containing the dataset's feature vectors
+            The matrix containing the dataset's feature vector(s)
         y: np.ndarray (default=None)
             The label vector
         features: list (deafult=None)
-            The names of the features
+            The name(s) of the feature(s)
         label: str (default=None)
             The name of the label
         """
-        if y is not None:
-            if X.shape[0] != y.size:
-                raise ValueError("The number of examples in 'X' must be equal to the size of 'y'.")
-        # reshape X if it only has one feature (otherwise, it defaults to a one dimensional array) 
+        # check dimensions
+        self._check_init(X, y, features)
+        # parameters
+        # reshape X if it only has one feature (otherwise, it defaults to a one dimensional array)
         self.X = X if X.ndim > 1 else np.reshape(X, (-1, 1))
         self.y = y
         self.features = [f"feat{i+1}" for i in range(X.shape[1])] if features is None else features
         self.label = "label" if (y is not None and label is None) else label
+
+    @staticmethod
+    def _check_init(X: np.ndarray, y: np.ndarray, features: list):
+        """
+        Checks whether the dimensions of the arrays it takes as parameters are correct.
+
+        Parameters
+        ----------
+        X: np.ndarray
+            The matrix containing the dataset's feature vector(s)
+        y: np.ndarray
+            The label vector
+        features: list
+            The name(s) of the feature(s)
+        """
+        if y is not None:
+            if X.shape[0] != y.size:
+                raise ValueError("The number of examples in 'X' must be equal to the size of 'y'.")
+        if features:
+            if X.shape[1] != len(features):
+                raise ValueError("The number of features in 'X' must be equal to len(features).")
 
     def shape(self) -> Tuple[int, int]:
         """
@@ -162,7 +183,7 @@ if __name__ == "__main__":
     print("EX1")
     X1 = np.array([[1,2,3],[4,5,6]])
     y1 = np.array([1,2])
-    f1 = ["A","B"]
+    f1 = ["A","B","C"]
     l1 = "y"
     ds1 = Dataset(X1, y1, f1, l1)
     print(f"shape: {ds1.shape()}")

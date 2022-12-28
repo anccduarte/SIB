@@ -7,13 +7,13 @@ from dataset import Dataset
 class PCA:
 
     """
-    PCA implementation to reduce the dimensions of a given dataset. It uses SVD (Singular
+    PCA implementation to reduce the dimensionality of a given dataset. It uses SVD (Singular
     Value Decomposition) to do so.
     """
 
     def __init__(self, n_components: int = 10):
         """
-        PCA implementation to reduce the dimensions of a given dataset. It uses SVD (Singular
+        PCA implementation to reduce the dimensionality of a given dataset. It uses SVD (Singular
         Value Decomposition) to do so.
 
         Parameters
@@ -56,7 +56,7 @@ class PCA:
         # center data (X - mean)
         self.mean = np.mean(dataset.X, axis=0)
         X_centered = dataset.X - self.mean
-        # calculate SVD -> X_centered = U@np.diag(S)@V_t
+        # compute SVD -> X_centered = U @ np.diag(S) @ V_t
         U, S, V_t = np.linalg.svd(X_centered, full_matrices=False)
         # determine the first <n_components> components
         self.components = V_t[:self.n_components]
@@ -70,7 +70,7 @@ class PCA:
 
     def transform(self, dataset: Dataset) -> np.ndarray:
         """
-        Transforms the dataset by reducing X (X_reduced = X * V, V = self.components.T).
+        Transforms the dataset by reducing X (X_reduced = X @ V, V = self.components.T).
         Returns X reduced.
 
         Parameters

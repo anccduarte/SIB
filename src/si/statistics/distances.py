@@ -16,7 +16,7 @@ def euclidean_distance(x: np.ndarray, y: np.ndarray) -> np.ndarray:
     """
     # vectorized operation: each data point in x is compared to each data point in y; also,
     # since y has n rows, this operation is performed n times
-    # axis=1 -> the comparisons are made columnwise
+    # axis=1 -> sums are made row-wise
     distances = np.sqrt(np.square(x-y).sum(axis=1))
     return distances
 
@@ -33,7 +33,7 @@ def manhattan_distance(x: np.ndarray, y: np.ndarray) -> np.ndarray:
     y: np.ndarray
         An array containing one or multiple rows
     """
-    distances = np.absolute(x-y).sum(axis=1).astype("float")
+    distances = np.absolute(x-y).sum(axis=1).astype(np.float64)
     return distances
 
 
@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
     ds = Dataset.from_random(n_examples=10, n_features=10, label=False, seed=0)
     x = ds.X[0,:]
-    y = ds.X[1:,]
+    y = ds.X[1:,:]
     print(euclidean_distance(x,y))
     print(manhattan_distance(x,y))
 

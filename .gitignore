@@ -1,6 +1,6 @@
 # Python (backup files)
-si/clustering/kmeans_bak.py
-si/neural_networks/nn_bak.py
+src/si/clustering/kmeans_bak.py
+src/si/neural_networks/nn_bak.py
 
 # DS_Store
 .DS_Store

@@ -11,7 +11,7 @@ def rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     y_true: np.ndarray
         The true values of the labels
     y_pred: np.ndarray
-        The labels predicted by a classifier
+        The labels predicted by a regressor
     """
     N = y_true.shape[0]
     return np.sqrt(np.sum((y_true-y_pred)**2) / N)

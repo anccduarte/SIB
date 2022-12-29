@@ -11,16 +11,16 @@ from typing import Callable, Union
 class KNNClassifier:
 
     """
-    Implements the K-Nearest Neighbors classifier.
-    Distances between test examples and some label can be computed using:
+    Implements the K-Nearest Neighbors classifier. Distances between test examples and examples
+    present in the training data can be computed using one of two distinct formulas:
         - euclidean_distance: sqrt(SUM[(pi - qi)^2])
         - manhattan_distance: SUM[abs(pi - qi)]
     """
 
     def __init__(self, k: int = 4, weighted: bool = False, distance: Callable = euclidean_distance):
         """
-        Implements the K-Nearest Neighbors classifier.
-        Distances between test examples and some label can be computed using:
+        Implements the K-Nearest Neighbors classifier. Distances between test examples and examples
+        present in the training data can be computed using one of two distinct formulas:
             - euclidean_distance: sqrt(SUM[(pi - qi)^2])
             - manhattan_distance: SUM[abs(pi - qi)]
 
@@ -29,7 +29,7 @@ class KNNClassifier:
         k: int (default=4)
             Number of neighbors to be used
         weighted: bool (default=False)
-            Whether to weight closest neighbors when predicti labels
+            Whether to weight closest neighbors when predicting labels
         distance: callable (default=euclidean_distance)
             Function used to compute the distances
 
@@ -70,7 +70,8 @@ class KNNClassifier:
 
     def _get_closest_label(self, sample: np.ndarray) -> Union[int, str]:
         """
-        Returns the closest label to the sample given as input.
+        Returns the predicted label of the sample given as input. The label is determined by
+        majority vote over the labels of the sample's <self.k> closest neighbors.
 
         Parameters
         ----------

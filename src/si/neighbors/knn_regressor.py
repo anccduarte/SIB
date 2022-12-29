@@ -11,16 +11,16 @@ from typing import Callable
 class KNNRegressor:
 
     """
-    Implements the K-Nearest Neighbors regressor.
-    Distances between test examples and some label can be computed using:
+    Implements the K-Nearest Neighbors regressor. Distances between test examples and examples
+    present in the training data can be computed using one of two distinct formulas:
         - euclidean_distance: sqrt(SUM[(pi - qi)^2])
         - manhattan_distance: SUM[abs(pi - qi)]
     """
 
     def __init__(self, k: int = 4, weighted: bool = False, distance: Callable = euclidean_distance):
         """
-        Implements the K-Nearest Neighbors regressor.
-        Distances between test examples and some label can be computed using:
+        Implements the K-Nearest Neighbors regressor. Distances between test examples and examples
+        present in the training data can be computed using one of two distinct formulas:
             - euclidean_distance: sqrt(SUM[(pi - qi)^2])
             - manhattan_distance: SUM[abs(pi - qi)]
 
@@ -70,7 +70,8 @@ class KNNRegressor:
 
     def _get_closest_labels_mean(self, sample: np.ndarray) -> float:
         """
-        Returns the mean value of the closest labels to the sample.
+        Returns the predicted label of the sample given as input. The label is determined by
+        computing the mean value of the labels of the sample's <self.k> closest neighbors.
 
         Parameters
         ----------
@@ -91,7 +92,7 @@ class KNNRegressor:
 
     def predict(self, dataset: Dataset) -> np.ndarray:
         """
-        Predicts and returns the classes of the dataset given as input.
+        Predicts and returns the labels of the dataset given as input.
 
         Parameters
         ----------

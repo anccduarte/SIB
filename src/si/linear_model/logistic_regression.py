@@ -11,8 +11,8 @@ from typing import Union
 class LogisticRegression:
 
     """
-    LogisticRegression is a logistic model using the L2 regularization.
-    This model solves the logistic regression problem using an adapted Gradient Descent technique.
+    Implements LogisticRegression, a logistic model using the L2 regularization. This model solves the
+    logistic regression problem using an adapted Gradient Descent technique.
     """
 
     def __init__(self,
@@ -22,19 +22,20 @@ class LogisticRegression:
                  tolerance: Union[int, float] = 0.0001,
                  adaptative_alpha: bool = False):
         """
-        LogisticRegression is a logistic model using the L2 regularization.
-        This model solves the logistic regression problem using an adapted Gradient Descent technique.
+        Implements LogisticRegression, a logistic model using the L2 regularization. This model solves the
+        logistic regression problem using an adapted Gradient Descent technique.
 
         Parameters
         ----------
         l2_penalty: int, float (default=1)
-            The L2 regularization parameter
+            The L2 regularization coefficient
         alpha: int, float (default=0.001)
             The learning rate
         max_iter: int (default=1000)
             The maximum number of iterations
         tolerance: int, float (default=0.0001)
-            Tolerance for stopping gradient descent
+            Tolerance for stopping gradient descent (maximum absolute difference in the value of the
+            loss function between two iterations)
         adaptative_alpha: bool (default=False)
             Whether an adaptative alpha is used in the gradient descent
 
@@ -43,24 +44,15 @@ class LogisticRegression:
         fitted: bool
             Whether the model is already fitted
         theta: np.ndarray
-            Model parameters, namely the coefficients of the linear model.
-            For example, x0 * theta[0] + x1 * theta[1] + ...
+            Model parameters, namely the coefficients of the linear model
         theta_zero: float
-            Model parameter, namely the intercept of the linear model.
-            For example, theta_zero * 1
+            Model parameter, namely the intercept of the linear model
         cost_history: dict
             A dictionary containing the values of the cost function (J function) at each iteration
             of the algorithm (gradient descent)     
         """
-        # check values
-        if l2_penalty <= 0:
-            raise ValueError("The value of 'l2_penalty' must be positive.")
-        if alpha <= 0:
-            raise ValueError("The value of 'alpha' must be positive.")
-        if max_iter < 1:
-            raise ValueError("The value of 'max_iter' must be a positive integer.")
-        if tolerance <= 0:
-            raise ValueError("The value of 'tolerance' must be positive.")
+        # check values of parameters
+        self._check_init(l2_penalty, alpha, max_iter, tolerance)
         # parameters
         self.l2_penalty = l2_penalty # lambda
         self.alpha = alpha
@@ -73,11 +65,40 @@ class LogisticRegression:
         self.theta_zero = None
         self.cost_history = {}
 
+    @staticmethod
+    def _check_init(l2_penalty: Union[int, float],
+                    alpha: Union[int, float],
+                    max_iter: int,
+                    tolerance: Union[int, float]):
+        """
+        Checks the values of numeric parameters.
+
+        Parameters
+        ----------
+        l2_penalty: int, float
+            The L2 regularization coefficient
+        alpha: int, float
+            The learning rate
+        max_iter: int
+            The maximum number of iterations
+        tolerance: int, float
+            Tolerance for stopping gradient descent (maximum absolute difference in the value of the
+            loss function between two iterations)
+        """
+        if l2_penalty <= 0:
+            raise ValueError("The value of 'l2_penalty' must be positive.")
+        if alpha <= 0:
+            raise ValueError("The value of 'alpha' must be positive.")
+        if max_iter < 1:
+            raise ValueError("The value of 'max_iter' must be a positive integer.")
+        if tolerance <= 0:
+            raise ValueError("The value of 'tolerance' must be positive.")
+
     def _gradient_descent_iter(self, dataset: Dataset, m: int) -> None:
         """
         Performs one iteration of the gradient descent algorithm. The algorithm goes as follows:
         1. Predicts the outputs of the dataset
-            -> X @ theta + theta_zero (it then uses the sigomid function)
+            -> sigmoid(X @ theta + theta_zero)
         2. Computes the gradient vector and adjusts it according to the value of alpha
             -> -(alpha / m) * [(y_true / y_pred) @ X - ((1 - y_true) / (1 - y_pred)) @ X]
         3. Computes the penalization term for theta
@@ -115,7 +136,7 @@ class LogisticRegression:
     def _regular_fit(self, dataset: Dataset) -> "LogisticRegression":
         """
         Fits the model to the dataset. Does not update the learning rate (self.alpha). Covergence is attained 
-        whenever the difference of cost function values between iterations is less than self.tolerance.
+        whenever the difference of cost function values between iterations is less than <self.tolerance>.
         Returns self (fitted model).
 
         Parameters
@@ -143,8 +164,8 @@ class LogisticRegression:
 
     def _adaptative_fit(self, dataset: Dataset) -> "LogisticRegression":
         """
-        Fits the model to the dataset. Updates the learning rate (self.alpha), by halving it every
-        time the difference of cost function values between iterations is less than self.tolerance.
+        Fits the model to the dataset. Updates the learning rate (self.alpha) by halving it every
+        time the difference of cost function values between iterations is less than <self.tolerance>.
         Returns self (fitted model).
 
         Parameters
@@ -228,10 +249,9 @@ class LogisticRegression:
         # compute actual predictions (not 'binarized')
         predictions = sigmoid_function(np.dot(dataset.X, self.theta) + self.theta_zero)
         # calculate value of the cost function
-        first_sum = -np.sum(dataset.y * np.log(predictions) + (1-dataset.y) * np.log(1-predictions)) / m
-        second_sum = (self.l2_penalty / (2*m)) * np.sum(self.theta**2)
-        cost = first_sum + second_sum
-        return cost
+        error = -np.sum(dataset.y * np.log(predictions) + (1-dataset.y) * np.log(1-predictions)) / m
+        regularization = (self.l2_penalty / (2*m)) * np.sum(self.theta**2)
+        return error + regularization
 
 
 if __name__ == "__main__":
@@ -246,7 +266,11 @@ if __name__ == "__main__":
     breast = read_csv_file(file=path_to_file, sep=",", features=False, label=True)
     breast.X = StandardScaler().fit_transform(breast.X)
     breast_trn, breast_tst = train_test_split(breast, test_size=0.3, random_state=2)
-    breast_logistic = LogisticRegression(l2_penalty=1, alpha=0.001, max_iter=2000, tolerance=0.0001, adaptative_alpha=False)
+    breast_logistic = LogisticRegression(l2_penalty=1,
+                                         alpha=0.001,
+                                         max_iter=2000,
+                                         tolerance=0.0001,
+                                         adaptative_alpha=False)
     breast_logistic = breast_logistic.fit(breast_trn)
     #predictions = breast_logistic.predict(breast_tst)
     #print(f"Predictions:\n{predictions}")

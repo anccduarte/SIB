@@ -10,8 +10,8 @@ from typing import Union
 class RidgeRegression:
 
     """
-    RidgeRegression is a linear model using the L2 regularization.
-    This model solves the linear regression problem using an adapted Gradient Descent technique.
+    Implements Ridge Regression, a linear model using the L2 regularization. This model solves the
+    linear regression problem using an adapted Gradient Descent technique.
     """
 
     def __init__(self,
@@ -21,19 +21,20 @@ class RidgeRegression:
                  tolerance: Union[int, float] = 1,
                  adaptative_alpha: bool = False):
         """
-        RidgeRegression is a linear model using the L2 regularization.
-        This model solves the linear regression problem using an adapted Gradient Descent technique.
+        Implements Ridge Regression, a linear model using the L2 regularization. This model solves the
+        linear regression problem using an adapted Gradient Descent technique.
 
         Parameters
         ----------
         l2_penalty: int, float (default=1)
-            The L2 regularization parameter
+            The L2 regularization coefficient
         alpha: int, float (default=0.001)
             The learning rate
         max_iter: int (default=1000)
             The maximum number of iterations
         tolerance: int, float (default=1)
-            Tolerance for stopping gradient descent
+            Tolerance for stopping gradient descent (maximum absolute difference in the value of the
+            loss function between two iterations)
         adaptative_alpha: bool (default=False)
             Whether an adaptative alpha is used in the gradient descent
 
@@ -43,23 +44,14 @@ class RidgeRegression:
             Whether the model is already fitted
         theta: np.ndarray
             Model parameters, namely the coefficients of the linear model
-            For example, x0 * theta[0] + x1 * theta[1] + ...
         theta_zero: float
             Model parameter, namely the intercept of the linear model
-            For example, theta_zero * 1
         cost_history: dict
             A dictionary containing the values of the cost function (J function) at each iteration
             of the algorithm (gradient descent)
         """
-        # check values
-        if l2_penalty <= 0:
-            raise ValueError("The value of 'l2_penalty' must be positive.")
-        if alpha <= 0:
-            raise ValueError("The value of 'alpha' must be positive.")
-        if max_iter < 1:
-            raise ValueError("The value of 'max_iter' must be a positive integer.")
-        if tolerance <= 0:
-            raise ValueError("The value of 'tolerance' must be positive.")
+        # check values of parameters
+        self._check_init(l2_penalty, alpha, max_iter, tolerance)
         # parameters
         self.l2_penalty = l2_penalty # lambda
         self.alpha = alpha
@@ -71,6 +63,35 @@ class RidgeRegression:
         self.theta = None
         self.theta_zero = None
         self.cost_history = {}
+
+    @staticmethod
+    def _check_init(l2_penalty: Union[int, float],
+                    alpha: Union[int, float],
+                    max_iter: int,
+                    tolerance: Union[int, float]):
+        """
+        Checks the values of numeric parameters.
+
+        Parameters
+        ----------
+        l2_penalty: int, float
+            The L2 regularization coefficient
+        alpha: int, float
+            The learning rate
+        max_iter: int
+            The maximum number of iterations
+        tolerance: int, float
+            Tolerance for stopping gradient descent (maximum absolute difference in the value of the
+            loss function between two iterations)
+        """
+        if l2_penalty <= 0:
+            raise ValueError("The value of 'l2_penalty' must be positive.")
+        if alpha <= 0:
+            raise ValueError("The value of 'alpha' must be positive.")
+        if max_iter < 1:
+            raise ValueError("The value of 'max_iter' must be a positive integer.")
+        if tolerance <= 0:
+            raise ValueError("The value of 'tolerance' must be positive.")
 
     def _gradient_descent_iter(self, dataset: Dataset, m: int) -> None:
         """
@@ -104,7 +125,7 @@ class RidgeRegression:
         penalization_term = self.theta * self.alpha * (self.l2_penalty / m)
         # update theta
         self.theta = self.theta - gradient - penalization_term
-        # compute gradient for theta_zero (penalizarion term is 0)
+        # compute gradient for theta_zero (penalization term is 0)
         gradient_zero = (self.alpha / m) * np.sum(y_pred - dataset.y)
         # update theta_zero
         self.theta_zero = self.theta_zero - gradient_zero
@@ -112,7 +133,7 @@ class RidgeRegression:
     def _regular_fit(self, dataset: Dataset) -> "RidgeRegression":
         """
         Fits the model to the dataset. Does not update the learning rate (self.alpha). Covergence is attained 
-        whenever the difference of cost function values between iterations is less than self.tolerance.
+        whenever the difference of cost function values between iterations is less than <self.tolerance>.
         Returns self (fitted model).
 
         Parameters
@@ -140,8 +161,8 @@ class RidgeRegression:
 
     def _adaptative_fit(self, dataset: Dataset) -> "RidgeRegression":
         """
-        Fits the model to the dataset. Updates the learning rate (self.alpha), by halving it every
-        time the difference of cost function values between iterations is less than self.tolerance.
+        Fits the model to the dataset. Updates the learning rate (self.alpha) by halving it every
+        time the difference of cost function values between iterations is less than <self.tolerance>.
         Returns self (fitted model).
 
         Parameters
@@ -218,7 +239,9 @@ class RidgeRegression:
         if not self.fitted:
             raise Warning("Fit 'RidgeRegression' before calling 'cost'.")
         y_pred = self.predict(dataset)
-        return (np.sum((y_pred - dataset.y) ** 2) + (self.l2_penalty * np.sum(self.theta ** 2))) / (2 * len(dataset.y))
+        sse = np.sum((y_pred - dataset.y) ** 2)
+        regularization = self.l2_penalty * np.sum(self.theta ** 2)
+        return (sse + regularization) / (2 * len(dataset.y))
 
 
 if __name__ == "__main__":

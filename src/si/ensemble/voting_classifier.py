@@ -9,17 +9,23 @@ from dataset import Dataset
 class VotingClassifier:
 
     """
-    Implements an ensemble model which uses voting as the combination function.
+    Implements an ensemble model which uses voting as the combination function. If
+    applicable, each prediction vector is weighted by the score of the model which
+    produced it.
     """
 
-    def __init__(self, models: list):
+    def __init__(self, models: list, weighted: bool = False):
         """
-        Implements an ensemble model which uses voting as the combination function.
+        Implements an ensemble model which uses voting as the combination function. If
+        applicable, each prediction vector is weighted by the score of the model which
+        produced it.
 
         Parameters
         ----------
         models: list
             A list object containing initialized instances of classifiers
+        weighted: bool (default=False)
+            Whether to weigh model predictions by the respective scores
 
         Attributes
         ----------
@@ -28,12 +34,13 @@ class VotingClassifier:
         """
         # parameters
         self.models = models
+        self.weighted = weighted
         # attributes
         self.fitted = False
 
     def fit(self, dataset: Dataset) -> "VotingClassifier":
         """
-        Fits VotingClassifier by fitting the models in self.models. Returns self.
+        Fits VotingClassifier by fitting the models in <self.models>. Returns self.
 
         Parameters
         ----------
@@ -61,7 +68,9 @@ class VotingClassifier:
     def predict(self, dataset: Dataset) -> np.ndarray:
         """
         Predicts and returns the output of the dataset. To do so, it uses voting to
-        combine the predictions of the models in self.models.
+        combine the predictions of the models in <self.models>. If <self.weighted> is
+        set to True, model predictions are weighted according to the respective scores.
+        Note: assumes that all models use the same scoring metric.
 
         Parameters
         ----------
@@ -70,7 +79,18 @@ class VotingClassifier:
         """
         if not self.fitted:
             raise Warning("Fit 'VotingClassifier' before calling 'predict'.")
+        # array containing the outputs of each k models in k rows
         predictions = np.array([model.predict(dataset) for model in self.models])
+        # weigh model predictions based on the respective scores
+        if self.weighted:
+            # get model scores
+            scores = [model.score(dataset) for model in self.models]
+            # scale scores so that min_score = 1
+            min_scr = min(scores)
+            scores_sc = np.array([round((1 / min_scr) * scr) for scr in scores])
+            # update predictions in order to account for the computed weights
+            predictions = np.repeat(predictions, repeats=scores_sc, axis=0)
+        # voting is performed col-wise so that outputs of different models are compared
         return np.apply_along_axis(self._get_majority_vote, axis=0, arr=predictions)
 
     def score(self, dataset: Dataset) -> float:
@@ -90,10 +110,9 @@ class VotingClassifier:
 
 if __name__ == "__main__":
 
-    TEST_PATHS = ["../io", "../linear_model", "../model_selection", "../neighbors", "../statistics"]
+    TEST_PATHS = ["../io", "../linear_model", "../model_selection", "../neighbors"]
     sys.path.extend(TEST_PATHS)
     from csv_file import read_csv_file
-    from distances import euclidean_distance
     from knn_classifier import KNNClassifier
     from logistic_regression import LogisticRegression
     from sklearn.preprocessing import StandardScaler
@@ -105,7 +124,7 @@ if __name__ == "__main__":
     breast_trn, breast_tst = train_test_split(breast, test_size=0.3, random_state=2)
 
     models = [KNNClassifier(), LogisticRegression()]
-    vc = VotingClassifier(models)
+    vc = VotingClassifier(models=models, weighted=True)
     vc = vc.fit(breast_trn)
     predictions = vc.predict(breast_tst)
     print(f"Predictions:\n{predictions}")

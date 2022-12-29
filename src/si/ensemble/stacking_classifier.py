@@ -1,7 +1,7 @@
 
 import numpy as np
 import sys
-PATHS = ["../data", "../linear_model", "../metrics", "../neighbors"]
+PATHS = ["../data", "../metrics", "../neighbors"]
 sys.path.extend(PATHS)
 from accuracy import accuracy
 from dataset import Dataset
@@ -12,13 +12,15 @@ class StackingClassifier:
 
     """
     Implements an ensemble model, which uses a stack of models to train a final classifier.
-    The stack of models is built by stacking the output (predictions) of each model.
+    The stack of models is built by stacking the output (predictions) of each model. If
+    applicable, each prediction vector is weighted by the score of the model which produced it.
     """
 
-    def __init__(self, models: list, final_model = KNNClassifier):
+    def __init__(self, models: list, final_model = KNNClassifier, weighted: bool = False):
         """
         Implements an ensemble model, which uses a stack of models to train a final classifier.
-        The stack of models is built by stacking the output (predictions) of each model.
+        The stack of models is built by stacking the output (predictions) of each model. If
+        applicable, each prediction vector is weighted by the score of the model which produced it.
 
         Parameters
         ----------
@@ -26,46 +28,62 @@ class StackingClassifier:
             A list object containing initialized instances of classifiers
         final_model: classifier (default=KNNClassifier)
             The final classifier to be used
+        weighted: bool (default=False)
+            Whether to weigh model predictions by the respective scores
 
         Attributes
         ----------
         fitted: bool
             Whether the model is already fitted
+        scores_sc: np.ndarray
+            The scaled scores of each model trained during fit
         """
         # parameters
         self.models = models
         self.final_model = final_model
+        self.weighted = weighted
         # attributes
         self.fitted = False
+        self.scores_sc = None
 
     def fit(self, dataset: Dataset) -> "StackingClassifier":
         """
         Fits StackingClassifier. To do so:
         1. Fits the models of the ensemble (self.models)
         2. Predicts labels based on those models
-        3. Fits the final model based on the latter predictions
+        3. If applicable, weighs predictions based on model scores
+        4. Fits the final model based on the computed predictions
 
         Parameters
         ----------
         dataset: Dataset
             A Dataset object (the dataset used to fit the model)
         """
-        # fit the ensemble on trainig data
+        # fit the ensemble on training data (1)
         for model in self.models:
             model.fit(dataset)
-        # get the predictions of each model for trainig data
+        # get the predictions of each model for training data (2)
         predictions = np.array([model.predict(dataset) for model in self.models])
-        # create a Dataset object
+        # weigh model predictions based on the respective scores (3)
+        if self.weighted:
+            # get model scores
+            scores = [model.score(dataset) for model in self.models]
+            # scale scores so that min_score = 1 (store scores_sc -> use in 'predict')
+            min_scr = min(scores)
+            self.scores_sc = np.array([round((1 / min_scr) * scr) for scr in scores])
+            # update predictions in order to account for the computed weights
+            predictions = np.repeat(predictions, repeats=self.scores_sc, axis=0)
+        # create a Dataset object containing the predictions
         ds_train = Dataset(predictions.T, dataset.y)
-        # fit the final model based on the predictions of the ensemble
+        # fit the final model based on the predictions of the ensemble (4)
         self.final_model.fit(ds_train)
         self.fitted = True
         return self
 
     def predict(self, dataset: Dataset) -> np.ndarray:
         """
-        Predicts and returns the output of the dataset. The predictions are made according
-        to self.final_model trained on the predictions of self.models.
+        Predicts and returns the output of the dataset. The predictions are made according to
+        <self.final_model> trained on the (weighted) predictions of <self.models>.
 
         Parameters
         ----------
@@ -76,7 +94,10 @@ class StackingClassifier:
             raise Warning("Fit 'StackingClassifier' before calling 'predict'.")
         # get the predictions of each model for testing data
         predictions = np.array([model.predict(dataset) for model in self.models])
-        # create a Dataset object
+        # weigh model predictions based on the scores obtained during training
+        if self.weighted:
+            predictions = np.repeat(predictions, repeats=self.scores_sc, axis=0)
+        # create a Dataset object containing the predictions
         ds_test = Dataset(predictions.T, dataset.y)
         # return the predictions
         return self.final_model.predict(ds_test)
@@ -98,10 +119,9 @@ class StackingClassifier:
 
 if __name__ == "__main__":
 
-    TEST_PATHS = ["../io", "../model_selection", "../statistics"]
+    TEST_PATHS = ["../io", "../linear_model", "../model_selection"]
     sys.path.extend(TEST_PATHS)
     from csv_file import read_csv_file
-    from distances import euclidean_distance
     from logistic_regression import LogisticRegression
     from sklearn.preprocessing import StandardScaler
     from split import train_test_split
@@ -112,7 +132,7 @@ if __name__ == "__main__":
     breast_trn, breast_tst = train_test_split(breast, test_size=0.3, random_state=2)
 
     models = [KNNClassifier(), LogisticRegression()]
-    sc = StackingClassifier(models, KNNClassifier())
+    sc = StackingClassifier(models=models, final_model=KNNClassifier(), weighted=True)
     sc = sc.fit(breast_trn)
     predictions = sc.predict(breast_tst)
     print(f"Predictions: {predictions}")

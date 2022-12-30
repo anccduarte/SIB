@@ -6,9 +6,32 @@ from dataset import Dataset
 from split import train_test_split
 from typing import Callable
 
-def cross_validate(model,
+
+# -- CHECK PARAMETERS
+
+def check_params(dataset: Dataset, cv: int, test_size: float):
+    """
+    Checks the values of numeric parameters.
+
+    Parameters
+    ----------
+    cv: int
+        The number of folds used in cross-validation
+    test_size: float
+        The proportion of the dataset to be used for testing
+    """
+    if cv < 1 or cv > dataset.shape()[0]:
+        raise ValueError("The value of 'cv' must be an integer belonging to [1, dim_0(dataset)].")
+    if test_size <= 0 or test_size >= 1:
+        raise ValueError("The value of 'test_size' must be in (0, 1).")
+
+
+# -- CROSS-VALIDATE
+
+def cross_validate(model: "estimator",
                    dataset: Dataset,
                    cv: int = 5,
+                   random_state: int = None,
                    test_size: float = 0.3,
                    scoring: Callable = None) -> dict:
     """
@@ -21,22 +44,30 @@ def cross_validate(model,
     Parameters
     ----------
     model: estimator
-        An instance of a classifier/regressor
+        An initialized instance of a classifier/regressor
     dataset: Dataset
         A Dataset object
     cv: int (default=5)
         The number of folds used in cross-validation
+    random_state: int (default=None)
+        Controls seed generation for splitting the data (allows for reproducible output)
     test_size: float (default=0.3)
         The proportion of the dataset to be used for testing
     scoring: callable (default=None)
         The scoring function used to evaluate the performance of the model (if None, uses the
         model's scoring function)
     """
+    # check values of numeric parameters
+    check_params(dataset, cv, test_size)
+    # main loop -> cross-validate model
     scores = {"seeds": [], "train": [], "test": []}
     for i in range(cv):
         # generate seed for train_test_split and add it to scores
-        seed = np.random.randint(0, 1000)
+        seed = np.random.RandomState(seed=random_state).randint(0, 1000)
         scores["seeds"] += [seed]
+        # update random_state so that a distinct seed is generated next time (only if 'int')
+        if random_state is not None:
+            random_state += 1
         # split data in train and test
         ds_train, ds_test = train_test_split(dataset=dataset, test_size=test_size, random_state=seed)
         # fit the model on training data
@@ -57,7 +88,7 @@ def cross_validate(model,
 
 if __name__ == "__main__":
 
-    TEST_PATHS = ["../io", "../linear_model", "../metrics", "../statistics"]
+    TEST_PATHS = ["../io", "../linear_model"] # "../metrics"
     sys.path.extend(TEST_PATHS)
     # from accuracy import accuracy
     from csv_file import read_csv_file
@@ -69,7 +100,7 @@ if __name__ == "__main__":
     breast.X = StandardScaler().fit_transform(breast.X)
     
     model = LogisticRegression()
-    cv = cross_validate(model=model, dataset=breast) # scoring=accuracy
+    cv = cross_validate(model=model, dataset=breast, random_state=2) # scoring=accuracy
     print(f"Cross-validation seeds and scores:\n{cv}")
     print(f"Mean score on trainig data: {np.mean(cv['train'])*100:.2f}%")
     print(f"Mean score on testing data: {np.mean(cv['test'])*100:.2f}%")

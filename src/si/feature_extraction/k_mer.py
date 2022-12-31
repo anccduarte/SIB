@@ -48,8 +48,8 @@ class KMer:
 
     def fit(self, dataset: Dataset) -> "KMer":
         """
-        Fits 'KMer' by computing all possible combinations of bases (nucleotides or amino acids) of
-        length <self.k>. Returns self.
+        Fits 'KMer' by computing all possible combinations of characters in <self.alphabet> (nucleotides
+        or amino acids) of length <self.k>. Returns self.
 
         Parameters
         ----------
@@ -66,8 +66,8 @@ class KMer:
 
     def _get_frequencies(self, sequence: np.ndarray) -> np.ndarray:
         """
-        Helper method that computes and returns the normalized frequencies of the k-mers of a
-        given sequence.
+        Helper method which computes and returns the normalized frequencies of the k-mers present in the
+        sequence it takes as a parameter.
 
         Parameters
         ----------
@@ -86,8 +86,8 @@ class KMer:
 
     def transform(self, dataset: Dataset) -> Dataset:
         """
-        Transforms 'KMer' by calculating the normalized frequencies of the k-mers of all sequences
-        in the dataset. Returns a new dataset object containing the computed data.
+        Transforms 'KMer' by calculating the normalized frequencies of the k-mers of all sequences in the
+        dataset. Returns a new dataset object containing the computed data.
 
         Parameters
         ----------
@@ -102,9 +102,10 @@ class KMer:
 
     def fit_transform(self, dataset: Dataset) -> Dataset:
         """
-        Fits and transforms 'KMeans' by computing all possible combinations of bases (nucleotides
-        or amino acids) of length <self.k>, and calculating the normalized frequencies of the k-mers
-        of all sequences in the dataset. Returns a new dataset object containing the computed data.
+        Fits and transforms 'KMeans' by computing all possible combinations of characters in
+        <self.alphabet> (nucleotides or amino acids) of length <self.k>, and calculating the normalized
+        frequencies of the k-mers of all sequences in the dataset. Returns a new dataset object containing
+        the computed data.
 
         Parameters
         ----------
@@ -125,6 +126,7 @@ if __name__ == "__main__":
     from split import train_test_split
     
     # TFBS (nucleotide k-mers)
+    print("TFBS DATASET (DNA sequences)")
     # read file to Dataset
     path = "../../../datasets/tfbs/tfbs.csv"
     tfbs = read_csv_file(path, sep=",", features=True, label=True)
@@ -142,8 +144,7 @@ if __name__ == "__main__":
     score = lr.score(tfbs_test)
     print(f"Accuracy score: {score*100:.2f}%")
 
-    print("\n################################################################################\n")
-
+    print("\nTRANSPORTERS DATASET (protein sequences)")
     # TRANSPORTERS (aminoacid k-mers)
     # read csv to Dataset
     path2 = "../../../datasets/transporters/transporters.csv"

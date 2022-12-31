@@ -17,7 +17,7 @@ def binary_cross_entropy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
         The predicted labels of the dataset
     """
     N = y_true.shape[0]
-    return -np.sum((y_true * np.log(y_pred)) + (1 - y_true) + np.log(1 - y_pred)) / N
+    return -np.sum((y_true * np.log(y_pred)) + (1 - y_true) * np.log(1 - y_pred)) / N
 
 def d_binary_cross_entropy(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
     """
@@ -54,7 +54,39 @@ def categorical_cross_entropy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
 def d_categorical_cross_entropy(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
     """
     Computes and returns the value of the partial derivative of the categorical
-    Cross-Entropy Loss with respect to y_pred.
+    Cross-Entropy Loss with respect to y_pred. It assumes that softmax activation is
+    used in the last layer of the neural network. Combining the cross-entropy and
+    softmax gradients originates the formula (y_pred - y_true), which is the function's
+    return value. Therefore, 'd_softmax', the derivative of the softmax activation
+    function (implemented in "../neural_networks/activation.py"), returns the array it
+    takes as input (X).
+
+    Formulas:
+    - softmax -> y_pred_i = exp(x_i) / SUM(k)[exp(x_k)]
+    - categorical cross-entropy -> L = -SUM(i)[y_true_i *ln(y_pred_i)]
+
+    Derivative of softmax:
+    - i = j
+      d(y_pred_i)/d(x_i) = 
+      = (exp(x_i) * SUM(k)[exp(x_k)] - exp(x_i)^2) / (SUM(k)[exp(x_k)])^2 =
+      = y_pred_i * (1 - y_pred_i)
+    - i != j
+      d(y_pred_i)/d(x_j) =
+      = (0 - exp(x_i) * exp(x_j)) / (SUM(k)[exp(x_k)])^2 =
+      = - y_pred_i * y_pred_j
+
+    Derivative of categorical cross-entropy:
+    - d(L)/d(y_pred_i) = -SUM(i)[y_true_i - (1 / y_pred_i)]
+
+    Combining gradients:
+    - d(L)/d(x_j) =
+      = - (SUM(i!=j)[y_true_i - (1 / y_pred_i)] * d(y_pred_i)/d(x_j) +
+        + y_true_j * (1 / y_pred_j) * d(y_pred_j)/d(x_j)) =
+      = - (SUM(i!=j)[y_true_i - (1 / y_pred_i)] * (-y_pred_i * y_pred_j) +
+        + y_true_j * (1 / y_pred_j) * y_pred_j * (1 - y_pred_j)) =
+      = SUM(i!=j)[y_true_i * y_pred_j] + y_true_j * y_pred_j - y_true_j =
+      = SUM(i)[y_true_i * y_pred_j] - y_true_j =
+      = y_pred_j - y_true_i
 
     Parameters
     ----------

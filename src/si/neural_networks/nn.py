@@ -130,7 +130,7 @@ class NN:
         x_batches = [x[i:i+size_batch] for i in range(0, num_examples, size_batch)]
         y_batches = [y[i:i+size_batch] for i in range(0, num_examples, size_batch)]
         # fix last batch (if the batch size is too small, concatenate to second-last batch)
-        if num_examples % self.num_batches < size_batch // 2:
+        if 0 < num_examples % self.num_batches < size_batch // 2:
             x_batches[-1] = np.concatenate((x_batches[-2], x_batches.pop(-1)), axis=0)
             y_batches[-1] = np.concatenate((y_batches[-2], y_batches.pop(-1)), axis=0)
         return x_batches, y_batches

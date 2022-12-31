@@ -33,7 +33,7 @@ class Dense:
         Initially, weights and bias are set as chosen by the user (choices are restricted to
         "random", "zeros" or "ones"). An activation function is applied to the output of the layer
         (by default, "identity"). A dropout function can be used to prevent overfitting (by default,
-        dropout=0).
+        dropout=0.0).
 
         Parameters
         ----------

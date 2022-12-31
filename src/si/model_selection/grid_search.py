@@ -3,6 +3,7 @@ import itertools
 import numpy as np
 import sys
 sys.path.append("../data")
+from copy import deepcopy
 from cross_validate import cross_validate
 from dataset import Dataset
 from typing import Callable
@@ -73,18 +74,20 @@ def grid_search_cv(model: "estimator",
         if not hasattr(model, param):
             e_msg = f"The model {model.__class__.__name__} does not have the parameter '{param}'."
             raise AttributeError(e_msg)
-    # initialize scores -> to return
+    # initialize 'scores' -> to return
     scores = []
     # for each combination of parameters
     for comb in itertools.product(*parameter_grid.values()):
-        # initialize parameters -> add to scores
+        # initilize new instance of 'model' (deepcopy) at each iteration
+        Model = deepcopy(model)
+        # initialize 'parameters' -> add to scores
         parameters = {}
         # set parameter configuration (according to comb) to cross-validate the model
         for param, value in zip(parameter_grid.keys(), comb):
-            setattr(model, param, value)
+            setattr(Model, param, value)
             parameters[param] = value
         # cross-validate the model
-        score = cross_validate(model, dataset, cv, random_state, test_size, scoring)
+        score = cross_validate(Model, dataset, cv, random_state, test_size, scoring)
         # add the parameter configuration to score (new key)
         score["parameters"] = parameters
         # add the cross-validation score to scores

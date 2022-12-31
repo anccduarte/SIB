@@ -2,6 +2,7 @@
 import numpy as np
 import sys
 sys.path.append("../data")
+from copy import deepcopy
 from cross_validate import cross_validate
 from dataset import Dataset
 from typing import Callable
@@ -86,17 +87,19 @@ def randomized_search_cv(model: "estimator",
     scores = []
     # cross-validate the model <n_iter> times
     for i in range(n_iter):
-        # initialize parameters -> add to scores
+        # initilize new instance of 'model' (deepcopy) at each iteration
+        Model = deepcopy(model)
+        # initialize 'parameters' -> add to scores
         parameters = {}
         # initialize seed for choosing hyperparameters (if 'int', random_state += 1)
         seed_hyper = random_state if random_state is None else random_state + i
         # set parameter configuration to cross-validate the model, and add it to parameters
         for param in parameter_distribution:
             value = np.random.RandomState(seed=seed_hyper).choice(parameter_distribution[param])
-            setattr(model, param, value)
+            setattr(Model, param, value)
             parameters[param] = value
         # cross-validate the model
-        score = cross_validate(model, dataset, cv, random_state, test_size, scoring)
+        score = cross_validate(Model, dataset, cv, random_state, test_size, scoring)
         # add the parameter configuration to score (new key)
         score["parameters"] = parameters
         # add the score to scores
@@ -131,7 +134,7 @@ if __name__ == "__main__":
                               dataset=breast,
                               parameter_distribution=params,
                               cv=3,
-                              random_state=0,
+                              random_state=2,
                               n_iter=10,
                               test_size=0.3)
     print_scores(gs)

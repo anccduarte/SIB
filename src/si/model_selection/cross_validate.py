@@ -2,6 +2,7 @@
 import numpy as np
 import sys
 sys.path.append("../data")
+from copy import deepcopy
 from dataset import Dataset
 from split import train_test_split
 from typing import Callable
@@ -62,24 +63,27 @@ def cross_validate(model: "estimator",
     # main loop -> cross-validate model
     scores = {"seeds": [], "train": [], "test": []}
     for i in range(cv):
-        # generate seed for train_test_split and add it to scores
-        seed = np.random.RandomState(seed=random_state).randint(0, 1000)
-        scores["seeds"] += [seed]
+        # initilize new instance of 'model' (deepcopy) at each iteration (otherwise, we only have a
+        # "fresh" model instance in the first iteration; in subsequent cv iterations, the models would
+        # "inherit" the state of the previous iteration)
+        Model = deepcopy(model)
         # update random_state so that a distinct seed is generated next time (only if 'int')
-        if random_state is not None:
-            random_state += 1
+        random_state = random_state if random_state is None else random_state + i
+        # generate seed for train_test_split and add it to scores
+        seed = np.random.RandomState(seed=random_state).randint(0, 100000)
+        scores["seeds"] += [seed]
         # split data in train and test
         ds_train, ds_test = train_test_split(dataset=dataset, test_size=test_size, random_state=seed)
         # fit the model on training data
-        model.fit(ds_train)
+        Model.fit(ds_train)
         # if scoring is None, use the model's scoring function
         if scoring is None:
-            train_score = model.score(ds_train)
-            test_score = model.score(ds_test)
+            train_score = Model.score(ds_train)
+            test_score = Model.score(ds_test)
         # otherwise, use the provided scoring function
         else:
-            train_score = score(ds_train.y, model.predict(ds_test))
-            test_score = score(ds_test.y, model.predict(ds_test))
+            train_score = score(ds_train.y, Model.predict(ds_test))
+            test_score = score(ds_test.y, Model.predict(ds_test))
         # add train_score and test_score to scores
         scores["train"] += [train_score]
         scores["test"] += [test_score]

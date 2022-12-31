@@ -1,7 +1,7 @@
 
 main = "../src/si"
-dirs = ["data", "io", "metrics", "model_selection", "neural_networks"]
-PATHS = [f"{main}/{d}" for d in dirs]
+dirs = ["data", "io", "metrics", "model_selection", "neural_networks", "statistics"]
+PATHS = [f"{main}/{dir_}" for dir_ in dirs]
 
 import sys
 sys.path.extend(PATHS)

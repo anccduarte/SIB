@@ -33,7 +33,10 @@ class Dataset:
         self.X = X if X.ndim > 1 else np.reshape(X, (-1, 1))
         self.y = y
         self.features = [f"feat{i+1}" for i in range(X.shape[1])] if features is None else features
-        self.label = "label" if (y is not None and label is None) else label
+        if y is not None:
+            if y.ndim == 1: self.label = "label"
+            else: self.label = [f"label{i+1}" for i in range(y.shape[1])]
+        else: self.label = label
 
     @staticmethod
     def _check_init(X: np.ndarray, y: np.ndarray, features: list):
@@ -50,8 +53,10 @@ class Dataset:
             The name(s) of the feature(s)
         """
         if y is not None:
-            if X.shape[0] != y.size:
-                raise ValueError("The number of examples in 'X' must be equal to the size of 'y'.")
+            if X.shape[0] != y.shape[0]:
+                # "The number of examples in 'X' must be equal to the size of 'y'."
+                e_msg = f"dim 0 of 'X' ({X.shape[0]},) does not match dim 0 of 'y' ({y.shape[0]},)."
+                raise ValueError(e_msg)
         if features:
             if X.shape[1] != len(features):
                 raise ValueError("The number of features in 'X' must be equal to len(features).")

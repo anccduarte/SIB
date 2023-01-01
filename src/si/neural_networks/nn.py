@@ -18,7 +18,10 @@ LOSS = {"mse": (mse, mse_derivative),
 class NN:
 
     """
-    Implements a multi-layered neural network model which trains using backpropagation. 
+    Implements a multi-layered neural network model which trains using backpropagation. It is
+    suitable for both regression and classification (binary and multi-class) problems. Note: in
+    multi-class classification problems, it is assumed that the label vector of the Dataset object
+    that the methods 'fit', 'predict' and 'score' take as a parameter is a one-hot encoded array.
     """
 
     def __init__(self,
@@ -30,8 +33,11 @@ class NN:
                  random_state: int = None,
                  verbose: bool = False):
         """
-        Initializes an instance of NN. It implements a multi-layered neural network model
-        which trains using backpropagation.
+        Initializes an instance of NN. It implements a multi-layered neural network model which
+        trains using backpropagation. It is suitable for both regression and classification (binary
+        and multi-class) problems. Note: in multi-class classification problems, it is assumed that
+        the label vector of the Dataset object that the methods 'fit', 'predict' and 'score' take as
+        a parameter is a one-hot encoded array.
         
         Parameters
         ----------
@@ -47,7 +53,7 @@ class NN:
         loss: str (default="mse")
             The name of the loss function to be used
         random_state: int (default=None)
-            Controls the shuffling of the dataset before the split into batches
+            Controls the shuffling of the dataset before splitting it into batches
         verbose: bool (default=False)
             Whether to print the value of the loss function at each epoch
 
@@ -69,6 +75,7 @@ class NN:
         self.epochs = epochs
         self.num_batches = num_batches
         self.alpha = alpha
+        self.loss = loss
         self.random_state = random_state
         self.verbose = verbose
         # attributes
@@ -121,10 +128,11 @@ class NN:
             s_msg = f" Setting 'num_batches' to {num_examples}..."
             warnings.warn(w_msg+s_msg, Warning)
             self.num_batches = num_examples
-        # get permutations, shuffle the dataset and reshape dataset.y
+        # get permutations, shuffle the dataset and reshape dataset.y (w/ and w/o one-hot)
         shuffle = np.random.RandomState(seed=self.random_state).permutation(num_examples)
         x = dataset.X[shuffle]
-        y = dataset.y.reshape(-1, 1)[shuffle]
+        if dataset.y.ndim == 1: y = dataset.y.reshape(-1, 1)[shuffle] # regression / binary
+        else: y = dataset.y[shuffle] # multi-class problem
         # get batches
         size_batch = num_examples // self.num_batches
         x_batches = [x[i:i+size_batch] for i in range(0, num_examples, size_batch)]
@@ -194,7 +202,8 @@ class NN:
 
     def score(self, dataset: Dataset, score_func: Callable) -> float:
         """
-        Computes and returns the score of the model on the given dataset.
+        Computes and returns the score of the model on the given dataset. If loss is computed
+        through binary cross-entropy, the predictions are binarized before calling 'score_func'.
 
         Parameters
         ----------
@@ -204,6 +213,9 @@ class NN:
             The scoring function to be used
         """
         y_pred = self.predict(dataset)
+        if self.loss == "binary_cross_entropy":
+            prob_mask = y_pred < 0.5
+            y_pred[prob_mask], y_pred[~prob_mask] = 0, 1
         return score_func(dataset.y, y_pred)
 
 

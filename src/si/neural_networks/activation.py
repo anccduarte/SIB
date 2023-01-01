@@ -142,7 +142,7 @@ def d_softmax(X: np.ndarray) -> np.ndarray:
         + y_true_j * (1 / y_pred_j) * y_pred_j * (1 - y_pred_j)) =
       = SUM(i!=j)[y_true_i * y_pred_j] + y_true_j * y_pred_j - y_true_j =
       = SUM(i)[y_true_i * y_pred_j] - y_true_j =
-      = y_pred_j - y_true_i
+      = y_pred_j - y_true_j
 
     Parameters
     ----------

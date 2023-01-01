@@ -86,7 +86,7 @@ def d_categorical_cross_entropy(y_true: np.ndarray, y_pred: np.ndarray) -> np.nd
         + y_true_j * (1 / y_pred_j) * y_pred_j * (1 - y_pred_j)) =
       = SUM(i!=j)[y_true_i * y_pred_j] + y_true_j * y_pred_j - y_true_j =
       = SUM(i)[y_true_i * y_pred_j] - y_true_j =
-      = y_pred_j - y_true_i
+      = y_pred_j - y_true_j
 
     Parameters
     ----------

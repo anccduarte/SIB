@@ -111,7 +111,7 @@ def d_sigmoid(X: np.ndarray) -> np.ndarray:
 
 def d_softmax(X: np.ndarray) -> np.ndarray:
     """
-    Computes the derivative of the softmax activation function. It assumes that
+    Computes the derivative of the softmax activation function. It is assumed that
     categorical cross-entropy is used as loss function. Combining the cross-entropy
     and softmax gradients originates the formula (y_pred - y_true), which is
     implemented in "../metrics/cross.entropy.py". Therefore, 'd_softmax' returns the
@@ -119,7 +119,7 @@ def d_softmax(X: np.ndarray) -> np.ndarray:
 
     Formulas:
     - softmax -> y_pred_i = exp(x_i) / SUM(k)[exp(x_k)]
-    - categorical cross-entropy -> L = -SUM(i)[y_true_i *ln(y_pred_i)]
+    - categorical cross-entropy -> L = -SUM(i)[y_true_i * ln(y_pred_i)]
 
     Derivative of softmax:
     - i = j

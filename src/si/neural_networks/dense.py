@@ -74,6 +74,7 @@ class Dense:
         # parameters
         self.input_size = input_size
         self.output_size = output_size
+        self.activation = activation
         self.random_state = random_state
         # attributes
         self.dense_input = None
@@ -184,14 +185,15 @@ class Dense:
         alpha: float
             The learning rate of the model
         """
-        # get dense error (error * f'(x))
-        error_prop_1 = error * self.activation_derivative(self.activation_input)
+        # compute error to propagate to dense
+        if self.activation == "softmax": error_prop_dense = error
+        else: error_prop_dense = error * self.activation_derivative(self.activation_input)
         # update weights and bias of dense
-        self.weights -= alpha * np.dot(self.dense_input.T, error_prop_1)
-        self.bias -= alpha * np.sum(error_prop_1, axis=0)
+        self.weights -= alpha * np.dot(self.dense_input.T, error_prop_dense)
+        self.bias -= alpha * np.sum(error_prop_dense, axis=0)
         # compute and return the error to propagate to the next layer
-        error_prop_2 = np.dot(error_prop_1, self.weights.T)
-        return error_prop_2
+        error_prop_next = np.dot(error_prop_dense, self.weights.T)
+        return error_prop_next
 
 
 if __name__ == "__main__":

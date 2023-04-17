@@ -54,4 +54,5 @@ called _si_, which, in turn, contains all the modules of the package.
 
 
 ## Credits
-This package is heavily inspired by [https://github.com/vmspereira/si](https://github.com/vmspereira/si).
+This package is heavily inspired by [https://github.com/vmspereira/si](https://github.com/vmspereira/si)
+and [https://github.com/cruz-f/si](https://github.com/cruz-f/si).

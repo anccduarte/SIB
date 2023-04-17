@@ -4,7 +4,7 @@ import numpy as np
 def mse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     Computes and returns the Mean-Squared Error (MSE) of the model on the given
-    dataset. MSE: SUM[(ti - pi)^2] / 2N
+    dataset. MSE: SUM[(ti - pi)^2] / 2N.
 
     Parameters
     ----------

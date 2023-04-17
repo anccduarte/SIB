@@ -16,6 +16,8 @@ def check_params(dataset: Dataset, cv: int, n_iter: int, test_size: float):
 
     Parameters
     ----------
+    dataset: Dataset
+        A Dataset object
     cv: int
         The number of folds used in cross-validation
     n_iter: int

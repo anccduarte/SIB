@@ -113,7 +113,7 @@ class LogisticRegression:
         Parameters
         ----------
         dataset: Dataset
-            A Dataset object (the dataset to fit the model to)
+            A Dataset object (the dataset used to fit the model)
         m: int
             The number of examples in the dataset
         """
@@ -142,7 +142,7 @@ class LogisticRegression:
         Parameters
         ----------
         dataset: Dataset
-            A Dataset object (the dataset to fit the model to)
+            A Dataset object (the dataset used to fit the model)
         """
         # get the shape of the dataset
         m, n = dataset.shape()
@@ -171,7 +171,7 @@ class LogisticRegression:
         Parameters
         ----------
         dataset: Dataset
-            A Dataset object (the dataset to fit the model to)
+            A Dataset object (the dataset used to fit the model)
         """
         # get the shape of the dataset
         m, n = dataset.shape()

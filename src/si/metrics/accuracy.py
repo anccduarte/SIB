@@ -4,7 +4,7 @@ import numpy as np
 def accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
     It computes and returns the accuracy score of the model on a given dataset.
-    Accuracy score: (TP+TN)/(TP+FP+TN+FN)
+    Accuracy score: (TP+TN)/(TP+FP+TN+FN).
 
     Parameters
     ----------

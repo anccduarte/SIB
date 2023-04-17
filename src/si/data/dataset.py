@@ -134,7 +134,7 @@ class Dataset:
         """
         Randomly generates and returns a new Dataset object based on given parameters. By default,
         the values of the dataset's features range from 1 to 9. If present, the values of the
-        dataset's label range, by deafult, from 0 to 2.
+        dataset's label range, by default, from 0 to 2.
 
         Parameters
         ----------

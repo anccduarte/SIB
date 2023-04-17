@@ -165,7 +165,7 @@ class KMeans:
         Parameters
         ----------
         dataset: Dataset
-            A Dataset object (ontaining the data to be clustered)
+            A Dataset object (containing the data to be clustered)
         """
         # initialize centroids and labels
         self._init_centroids(dataset) # (k,)

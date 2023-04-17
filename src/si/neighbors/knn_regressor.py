@@ -29,7 +29,7 @@ class KNNRegressor:
         k: int (default=4)
             Number of neighbors to be used
         weighted: bool (default=False)
-            Whether to weight closest neighbors when predicting labels
+            Whether to weigh closest neighbors when predicting labels
         distance: callable (default=euclidean_distance)
             Function used to compute the distances
 

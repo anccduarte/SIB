@@ -29,7 +29,7 @@ class KNNClassifier:
         k: int (default=4)
             Number of neighbors to be used
         weighted: bool (default=False)
-            Whether to weight closest neighbors when predicting labels
+            Whether to weigh closest neighbors when predicting labels
         distance: callable (default=euclidean_distance)
             Function used to compute the distances
 
@@ -84,7 +84,7 @@ class KNNClassifier:
         k_nearest_neighbors = np.argsort(distances)[:self.k]
         # get the classes corresponding to the previous indexes
         knn_labels = self.dataset.y[k_nearest_neighbors]
-        # tranform labels vector to account for weights (if applicable)
+        # transform labels vector to account for weights (if applicable)
         if self.weighted:
             knn_labels = np.repeat(knn_labels, self.weights_vector)
         # get the most frequent class in the selected <k> examples
@@ -93,7 +93,7 @@ class KNNClassifier:
 
     def predict(self, dataset: Dataset) -> np.ndarray:
         """
-        Predicts and returns the classes of the dataset given as input.
+        Predicts and returns the labels of the dataset given as input.
 
         Parameters
         ----------

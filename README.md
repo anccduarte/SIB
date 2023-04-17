@@ -12,11 +12,11 @@ All algorithms are implemented from scratch using _numpy_ and _pandas_.
 ## Setup
 To get started, fork the repository from _GitHub_ and clone it to your local machine.
 
-Fork the following _GitHub_ repository: https://github.com/anccduarte/SIB
+Fork the following _GitHub_ repository: https://github.com/anccduarte/SIB-ML-Portfolio
 
 Then, clone the repository to your local machine:
 ```bash
-git clone https://github.com/YOUR_USERNAME/SIB.git
+git clone https://github.com/YOUR_USERNAME/SIB-ML-Portfolio.git
 ```
 
 Open the repository in your favorite _IDE_ and install the dependencies (if missing):

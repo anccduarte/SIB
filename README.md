@@ -1,7 +1,8 @@
-# Intelligent Systems for Bioinformatics
+# SIB
 
 ## Curricular Unit
-Masters in Bioinformatics, University of Minho, 2022-2023.
+SIB - Intelligent Systems for Bioinformatics
+Masters in Bioinformatics, University of Minho (2022-2023)
 
 
 ## Description
